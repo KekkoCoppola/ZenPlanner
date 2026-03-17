@@ -164,10 +164,7 @@ cython_debug/
 # VS Code
 .vscode/
 
-# Ignore big datasets and assignment files
-data/*.csv
-data/*.xlsx
-data/*.json
+# Ignore per i criteri di valutazione
 Criteri\ di\ valutazione\ dei\ progetti.pdf
 
 # macOS
