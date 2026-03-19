@@ -43,11 +43,17 @@ def main():
     results = {}
     
     print("Calcolo Metriche RMSE in corso...")
+    best_model_name = None
+    best_rmse = float('inf')
+    
     for name, model in models.items():
         cv_scores = cross_val_score(model, X_train, y_train, scoring='neg_mean_squared_error', cv=kf, n_jobs=-1)
         mean_rmse = np.sqrt(-cv_scores).mean()
         results[name] = mean_rmse
         print(f"[{name}] RMSE: {mean_rmse:.4f}")
+        if mean_rmse < best_rmse:
+            best_rmse = mean_rmse
+            best_model_name = name
         
     # 1. PLOT DEI RISULTATI RMSE
     plt.figure(figsize=(12, 6))
@@ -99,6 +105,22 @@ def main():
     print("\nImpatto percentuale stimato delle feature Ratio sul modello:")
     if len(wr_imp) > 0: print(f"Work_Rest_Ratio: {wr_imp[0]*100:.2f}%")
     if len(se_imp) > 0: print(f"Social_Exercise_Ratio: {se_imp[0]*100:.2f}%")
+
+    # 3. ESPORTAZIONE DEL MIGLIOR MODELLO PER L'ORACOLO CSP
+    import joblib
+    print(f"\n[ESPORTAZIONE] Il miglior modello è risultato: {best_model_name} con RMSE: {best_rmse:.4f}")
+    best_algorithm = models[best_model_name]
+    best_algorithm.fit(X_train, y_train)
+    
+    models_dir = os.path.join(base_dir, "src", "ml_pipeline", "models")
+    os.makedirs(models_dir, exist_ok=True)
+    
+    model_path = os.path.join(models_dir, "tuned_best_model.pkl")
+    features_path = os.path.join(models_dir, "model_features.pkl")
+    
+    joblib.dump(best_algorithm, model_path)
+    joblib.dump(list(X_train.columns), features_path)
+    print(f"Modello e Features esportati correttamente in: {models_dir}")
 
 if __name__ == "__main__":
     main()
