@@ -16,6 +16,12 @@ Il core del progetto si basa su un'interazione avanzata tra due motori:
    
    Il ML funge da *Funzione Obiettivo (Oracolo)* valutando lo stress generato specifico di quel piano (da 1 a 10). Se il punteggio sfora la soglia fisiologica consentita, il CSP applica il backtracking immediato: taglia il ramo schedulato e impone pause o redistribuisce la fatica, garantendo come output finale l'orario più salubre.
 
+**Vincoli architetturali implementati:**
+- **NoOverlapConstraint**: (Hard constraint) Previene accavallamenti temporali tra le sessioni di studio.
+- **DeadlineConstraint**: (Hard constraint) Garantisce che ogni singola materia venga distribuita temporalmente sempre in anticipo rispetto alla data dell'esame o scadenza associata.
+- **DailyMaxHoursConstraint**: (Hard constraint) Protezione del carico didattico basata sulla soglia di inserimento manuale dell'utente.
+- **MLStressOracleConstraint**: (Soft/Hard cutoff) L'algoritmo predittivo che simula l'impatto psicologico (basato su scaler e gradient boosting locale) del planning parziale. Non operando su soglie rigide fisse, consente uno scaling orizzontale in base all'allenamento reale dell'utente.
+
 ## Struttura della Repository
 
 Il progetto è suddiviso per dominio:
