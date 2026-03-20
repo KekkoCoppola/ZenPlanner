@@ -11,8 +11,6 @@
 
 ---
 
-ZenPlanner è uno scheduler adattivo intelligente progettato per ottimizzare lo studio e preservare l'equilibrio psicofisico (salute mentale). A differenza dei tradizionali pianificatori statici, ZenPlanner adotta un'architettura **ibrida neuro-simbolica** che combina **Intelligenza Artificiale Simbolica (CSP)** e **Machine Learning (Regressione Predittiva)**. Il sistema genera dinamicamente un piano di studi settimanale che bilancia il carico didattico, massimizzando il rendimento nel rispetto dei limiti di stress individuali.
-
 ## 👥 Team
 
 Le menti dietro ZenPlanner. Studenti di Informatica presso l'Università degli Studi di Salerno.
