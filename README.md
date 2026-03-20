@@ -15,7 +15,7 @@ ZenPlanner è uno scheduler adattivo intelligente progettato per ottimizzare lo 
 
 ## 👥 Team
 
-Le menti dietro Italicious. Studenti di Informatica presso l'Università degli Studi di Salerno.
+Le menti dietro ZenPlanner. Studenti di Informatica presso l'Università degli Studi di Salerno.
 
 <table align="center">
   <tr>
