@@ -13,6 +13,32 @@
 
 ZenPlanner è uno scheduler adattivo intelligente progettato per ottimizzare lo studio e preservare l'equilibrio psicofisico (salute mentale). A differenza dei tradizionali pianificatori statici, ZenPlanner adotta un'architettura **ibrida neuro-simbolica** che combina **Intelligenza Artificiale Simbolica (CSP)** e **Machine Learning (Regressione Predittiva)**. Il sistema genera dinamicamente un piano di studi settimanale che bilancia il carico didattico, massimizzando il rendimento nel rispetto dei limiti di stress individuali.
 
+## 👥 Team
+
+Le menti dietro Italicious. Studenti di Informatica presso l'Università degli Studi di Salerno.
+
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="https://github.com/KekkoCoppola.png" width="100px;" alt="" style="border-radius: 50%;"/><br />
+      <sub><b>Francesco Coppola</b></sub><br />
+      <a href="https://github.com/KekkoCoppola" title="GitHub">💻 GitHub</a>
+    </td>
+        <td align="center">
+      <!-- o -->
+      <img src="https://github.com/rosx3.png" width="100px;" alt="" style="border-radius: 50%;"/><br />
+      <sub><b>Rosaria Cervino</b></sub><br />
+      <a href="https://github.com/rosx3" title="GitHub">💻 GitHub</a>
+    </td>
+        <td align="center">
+      <!--  -->
+      <img src="https://github.com/elesshhhh.png" width="100px;" alt="" style="border-radius: 50%;"/><br />
+      <sub><b>Elena Carlomagno</b></sub><br />
+      <a href="https://github.com/elesshhhh" title="GitHub">💻 GitHub</a>
+    </td>
+  </tr>
+</table>
+
 ## Architettura Ibrida: Oracolo ML → CSP Engine
 
 Il core del progetto si basa su un'interazione **bidirezionale** tra due motori:
