@@ -6,7 +6,7 @@ from typing import List, Dict, Optional
 
 from .domain import UserProfile, StudySession, TimeSlot
 from .csp import CSP
-from .constraints import NoOverlapConstraint, DailyMaxHoursConstraint
+from .constraints import NoOverlapConstraint, DailyMaxHoursConstraint, MaxConsecutiveConstraint, DeadlineConstraint
 from .solver import CSPSolver
 
 warnings.filterwarnings('ignore', category=UserWarning)
@@ -38,7 +38,8 @@ class ZenSchedulerEngine:
 
     def predict_baseline_stress(self, total_study_hours: int) -> float:
         """ML Oracle Gatekeeper: calcola olisticamente l'impatto psicologico del volume richiesto."""
-        if not self.model or not self.scaler: return 0.0
+        if not self.model or not self.scaler: 
+            raise RuntimeError("CRITICAL: model or scaler is None! Path is broken inside Streamlit context.")
         
         work_rest_ratio = total_study_hours / max((self.user.sleep_hours_per_night * 7), 1)
         social_ex = (self.user.social_media_hours_per_day * 7) / (self.user.physical_exercise_hours_per_week + 0.1)
@@ -67,53 +68,73 @@ class ZenSchedulerEngine:
                 input_data[k] = [v]
             
         df = pd.DataFrame(input_data)
-        if self.model_features:
-            for col in self.model_features:
-                if col not in df.columns: df[col] = 0
-            df = df[self.model_features]
             
         try:
-            numeric_cols = getattr(self.scaler, 'feature_names_in_', df.columns[:13])
-            cols_to_scale = [c for c in numeric_cols if c in df.columns]
-            df[cols_to_scale] = self.scaler.transform(df[cols_to_scale])
-            return float(self.model.predict(df)[0])
-        except Exception:
-            return 0.0
+            # 1. Applica lo Scaler a TUTTE e 13 le feature numeriche
+            if hasattr(self.scaler, 'feature_names_in_'):
+                for col in self.scaler.feature_names_in_:
+                    if col not in df.columns:
+                        df[col] = 0
+                df_scaled = df[self.scaler.feature_names_in_].copy()
+                df_scaled.loc[:, :] = self.scaler.transform(df_scaled)
+            else:
+                df_scaled = df.copy()
+                
+            # 2. Poi, estrai SOLO le feature richieste dal modello (es. le 7 della RForest)
+            if hasattr(self.model, 'feature_names_in_'):
+                final_input = df_scaled[self.model.feature_names_in_]
+            elif self.model_features:
+                final_input = df_scaled[self.model_features]
+            else:
+                final_input = df_scaled
+                
+            # 3. Predizione effettiva
+            prediction = self.model.predict(final_input)[0]
+            return float(min(10.0, max(1.0, prediction)))
+        except Exception as e:
+            raise e
 
-    def generate_schedule(self, subjects: Dict[str, int], available_slots: List[TimeSlot]) -> tuple[Optional[Dict[StudySession, TimeSlot]], str]:
+    def generate_schedule(self, planned_sessions: List[StudySession], available_slots: List[TimeSlot]) -> tuple[Optional[Dict[StudySession, TimeSlot]], str]:
         """
-        Motore generativo.
-        Ritorna una tupla: (Assegnamento, Messaggio/Insight del Machine Learning).
+        Motore generativo. Mappa le variabili complesse (materie, priorità, scadenze) negli slot CSP.
         """
-        total_hours_requested = sum(subjects.values())
-        insight_msg = f"Volume richiesto: {total_hours_requested} ore. "
+        total_hours_requested = len(planned_sessions)
+        insight_msg = f"Volume richiesto: {total_hours_requested} sessioni. "
         
         # --- 1. COLLABORAZIONE OLISTICA ML -> AI ---
         predicted_stress = self.predict_baseline_stress(total_hours_requested)
-        insight_msg += f"Lo Stress Oracolare predetto e' {predicted_stress:.1f}/10. "
+        insight_msg += f"Stress ML predetto: {predicted_stress:.1f}/10. "
         
         dynamic_max_daily_hours = self.user.max_study_hours_per_day
         
         if predicted_stress > self.user.max_stress_tolerance:
             # HYPERPARAMETER TUNING DA PARTE DEL ML SERVER AL SIMBOLIC CSP
             dynamic_max_daily_hours = max(2, dynamic_max_daily_hours - 2)
-            insight_msg += f"ALLARME: Soglia superata. L'AI ha forzato un abbassamento del tetto giornaliero a {dynamic_max_daily_hours}h per diluire obbligatoriamente il carico."
+            max_consecutive_hours = 1
+            insight_msg += f"ALLARME Burnout. L'Oracolo forza tetto a {dynamic_max_daily_hours}h/giorno e stringhe di {max_consecutive_hours}h per imporre il riposo."
         else:
-            insight_msg += "Carico sano. Procedo con la distribuzione ottimizzata."
+            max_consecutive_hours = 2
+            insight_msg += f"Carico sano. Distribuzione adattiva attivata (max {max_consecutive_hours}h senza pause)."
             
         # --- 2. ISTANZIAZIONE CSP ---
-        variables = []
-        for subj, hours in subjects.items():
-            for i in range(hours):
-                variables.append(StudySession(id=f"{subj}_{i+1}", subject=subj))
-                
-        domains = {var: available_slots for var in variables}
-        csp = CSP(variables, domains)
+        domains = {var: available_slots for var in planned_sessions}
+        csp = CSP(planned_sessions, domains)
         
         # --- 3. INIEZIONE HARD CONSTRAINTS ---
-        csp.add_constraint(NoOverlapConstraint(variables))
+        csp.add_constraint(NoOverlapConstraint(planned_sessions))
+        csp.add_constraint(MaxConsecutiveConstraint(planned_sessions, max_consecutive_hours))
         for day in range(7):
-            csp.add_constraint(DailyMaxHoursConstraint(variables, dynamic_max_daily_hours, day))
+            csp.add_constraint(DailyMaxHoursConstraint(planned_sessions, dynamic_max_daily_hours, day))
+            
+        # Dinamizzazione delle Scadenze (Rigid Constraints)
+        has_deadlines = False
+        for session in planned_sessions:
+            if session.deadline_day is not None:
+                csp.add_constraint(DeadlineConstraint(session))
+                has_deadlines = True
+                
+        if has_deadlines:
+            insight_msg += " Rilevati vincoli di scadenza rigidi: il Solver è in modalità ad alta restrizione."
             
         # --- 4. ENGINE E ESECUZIONE ---
         solver = CSPSolver(csp)

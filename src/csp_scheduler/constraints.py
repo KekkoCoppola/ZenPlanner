@@ -62,4 +62,33 @@ class DailyMaxHoursConstraint(Constraint[StudySession, TimeSlot]):
         return day_sessions_count <= self.max_hours
 
 
-
+class MaxConsecutiveConstraint(Constraint[StudySession, TimeSlot]):
+    """
+    Assicura che non ci siano più di 'max_consec' ore di studio ininterrotte consecutivamente.
+    Implicita la creazione di "buchi" (pause zen) tra blocchi intensivi.
+    """
+    def __init__(self, variables: List[StudySession], max_consec: int):
+        super().__init__(variables)
+        self.max_consec = max_consec
+        
+    def satisfied(self, assignment: Dict[StudySession, TimeSlot]) -> bool:
+        # Raduniamo per giorni
+        days_slots = {}
+        for slot in assignment.values():
+            if slot.day_of_week not in days_slots:
+                days_slots[slot.day_of_week] = []
+            days_slots[slot.day_of_week].append(slot.start_time)
+            
+        # Conteggio contiguità formale
+        for hours in days_slots.values():
+            if not hours: continue
+            sorted_hours = sorted(hours)
+            consec = 1
+            for i in range(len(sorted_hours) - 1):
+                if sorted_hours[i+1] - sorted_hours[i] == 1:
+                    consec += 1
+                    if consec > self.max_consec:
+                        return False
+                else:
+                    consec = 1 # resetta contatore alla pausa
+        return True
