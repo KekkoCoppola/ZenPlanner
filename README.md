@@ -5,7 +5,7 @@
 <h1 align="center">ZenPlanner</h1>
 
 <p align="center">
-  <b>Scheduler Adattivo Intelligente · Architettura Neuro-Simbolica</b><br>
+  <b>Scheduler Adattivo Intelligente</b><br>
   Machine Learning · Constraint Satisfaction · Streamlit Dashboard
 </p>
 
