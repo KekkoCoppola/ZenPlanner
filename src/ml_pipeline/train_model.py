@@ -14,7 +14,7 @@ import xgboost as xgb
 warnings.filterwarnings('ignore')
 
 def main():
-    base_dir = r"c:\Users\Master\Documents\GitHub\ZenPlanner"
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     processed_dir = os.path.join(base_dir, "data", "processed")
     analytics_dir = os.path.join(base_dir, "analytics")
     

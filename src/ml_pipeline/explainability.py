@@ -11,7 +11,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 def main():
-    base_dir = r"c:\Users\Master\Documents\GitHub\ZenPlanner"
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     processed_dir = os.path.join(base_dir, "data", "processed")
     analytics_dir = os.path.join(base_dir, "analytics")
     os.makedirs(analytics_dir, exist_ok=True)

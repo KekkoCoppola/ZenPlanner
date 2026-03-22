@@ -10,7 +10,7 @@ except ImportError:
     sys.exit(1)
 
 def main():
-    base_dir = r"c:\Users\Master\Documents\GitHub\ZenPlanner"
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     input_path = os.path.join(base_dir, "data", "processed", "Student_Mental_Stress_and_Coping_Mechanisms_Cleaned.csv")
     analytics_dir = os.path.join(base_dir, "analytics")
     

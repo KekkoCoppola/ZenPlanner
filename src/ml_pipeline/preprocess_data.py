@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 def main():
-    base_dir = r"c:\Users\Master\Documents\GitHub\ZenPlanner"
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     input_path = os.path.join(base_dir, "data", "Student_Mental_Stress_and_Coping_Mechanisms.csv")
     output_dir = os.path.join(base_dir, "data", "processed")
     models_dir = os.path.join(base_dir, "src", "ml_pipeline", "models")
