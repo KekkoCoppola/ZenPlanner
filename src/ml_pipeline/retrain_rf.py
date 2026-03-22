@@ -3,7 +3,7 @@ import pandas as pd
 import joblib
 from sklearn.ensemble import RandomForestRegressor
 
-base_dir = r"c:\Users\franc\Desktop\ZenPlanner"
+base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 processed_dir = os.path.join(base_dir, "data", "processed")
 models_dir = os.path.join(base_dir, "src", "ml_pipeline", "models")
 

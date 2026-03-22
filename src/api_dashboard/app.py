@@ -132,32 +132,32 @@ def view_profile():
     st.markdown("<h1>Profilo Utente & Parametri ML 🧬</h1>", unsafe_allow_html=True)
     st.markdown("Configura le tue abitudini per calibrare l'Apprendimento Automatico e l'algoritmo di pianificazione.<br><br>", unsafe_allow_html=True)
 
-    c1, c2, c3 = st.columns(3)
+    c1, c2 = st.columns(2)
     with c1:
         st.markdown("### Dati Fisici & Accademici")
         age = st.slider("Età", 18, 50, 22)
-        sleep = st.slider("Ore di Sonno medie/notte", 3.0, 14.0, 7.0)
+        st.markdown("<p style='font-size: 0.9rem; margin-bottom: 0;'>Ore di Sonno medie/notte</p>", unsafe_allow_html=True)
+        col_sh, col_sm = st.columns(2)
+        with col_sh: sleep_h = st.number_input("Ore", min_value=0, max_value=24, value=7, key="sh")
+        with col_sm: sleep_m = st.number_input("Min", min_value=0, max_value=59, value=0, key="sm")
+        sleep = sleep_h + (sleep_m / 60.0)
         study = st.number_input("Carico Studio Attuale (h/settimana)", 0, 80, 20)
-        gpa = st.slider("GPA Attuale (0-4)", 0.0, 4.0, 3.0)
     with c2:
-        st.markdown("### Routine e Sfide")
-        social = st.slider("Social Media (h/giorno)", 0.0, 10.0, 2.0)
+        st.markdown("### Routine e Pressioni")
+        st.markdown("<p style='font-size: 0.9rem; margin-bottom: 0;'>Social Media (h/giorno)</p>", unsafe_allow_html=True)
+        col_soh, col_som = st.columns(2)
+        with col_soh: social_h = st.number_input("Ore", min_value=0, max_value=24, value=2, key="soh")
+        with col_som: social_m = st.number_input("Min", min_value=0, max_value=59, value=0, key="som")
+        social = social_h + (social_m / 60.0)
         exercise = st.slider("Attività Fisica (h/settimana)", 0, 20, 3)
-        family_support = st.slider("Supporto Familiare (1-5)", 1, 5, 3)
-        financial_stress = st.slider("Stress Finanziario (1-5)", 1, 5, 3)
-    with c3:
-        st.markdown("### Pressioni Psicologiche")
-        peer_pressure = st.slider("Pressione dei Pari (1-5)", 1, 5, 3)
         relation_stress = st.slider("Stress Relazionale (1-5)", 1, 5, 2)
-        diet_quality = st.slider("Qualità Dieta (1-5)", 1, 5, 3)
 
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("💾 Trasmetti Dati al Machine Learning", use_container_width=True):
         st.session_state['user_profile'] = UserProfile(
-            age=age, gpa=gpa, social_media_hours_per_day=social, sleep_hours_per_night=sleep,
-            physical_exercise_hours_per_week=exercise, family_support=family_support,
-            financial_stress=financial_stress, peer_pressure=peer_pressure,
-            relationship_stress=relation_stress, diet_quality=diet_quality, coping_mechanisms={}
+            age=age, social_media_hours_per_day=social, sleep_hours_per_night=sleep,
+            physical_exercise_hours_per_week=exercise, relationship_stress=relation_stress, 
+            coping_mechanisms={}
         )
         st.session_state['profile_configured'] = True
         st.success("✅ Modello Aggiornato! Le features sono pronte per il Random Forest.")

@@ -46,16 +46,11 @@ class ZenSchedulerEngine:
         
         input_data = {
             'Age': [self.user.age],
-            'Academic Performance (GPA)': [self.user.gpa],
             'Study Hours Per Week': [total_study_hours],
             'Social Media Usage (Hours per day)': [self.user.social_media_hours_per_day],
             'Sleep Duration (Hours per night)': [self.user.sleep_hours_per_night],
             'Physical Exercise (Hours per week)': [self.user.physical_exercise_hours_per_week],
-            'Family Support': [self.user.family_support],
-            'Financial Stress': [self.user.financial_stress],
-            'Peer Pressure': [self.user.peer_pressure],
             'Relationship Stress': [self.user.relationship_stress],
-            'Diet Quality': [self.user.diet_quality],
             'Work_Rest_Ratio': [work_rest_ratio],
             'Social_Exercise_Ratio': [social_ex]
         }
