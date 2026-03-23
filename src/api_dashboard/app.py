@@ -153,21 +153,21 @@ def view_profile():
         relation_stress = st.slider("Stress Relazionale (1-5)", 1, 5, 2)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("💾 Trasmetti Dati al Machine Learning", use_container_width=True):
+    if st.button("💾 Salva Profilo", use_container_width=True):
         st.session_state['user_profile'] = UserProfile(
             age=age, social_media_hours_per_day=social, sleep_hours_per_night=sleep,
             physical_exercise_hours_per_week=exercise, relationship_stress=relation_stress, 
             coping_mechanisms={}
         )
         st.session_state['profile_configured'] = True
-        st.success("✅ Modello Aggiornato! Le features sono pronte per il Random Forest.")
+        st.success("✅ Profilo Salvato!.")
 
 
 def view_scheduler():
     st.markdown("<h1>Generatore Piano CSP 🚀</h1>", unsafe_allow_html=True)
 
     if not st.session_state['profile_configured']:
-        st.error("⚠️ Configura prima il tuo Profilo Utente per istruire l'Oracolo ML!")
+        st.error("⚠️ Configura prima il tuo Profilo Utente !")
         return
 
     user = st.session_state.get('user_profile')
@@ -182,7 +182,7 @@ def view_scheduler():
     with c3: subj_dead = st.selectbox("Scadenza Limite", ["Nessuna","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"])
     with c4:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("➕ Add"):
+        if st.button("➕ Aggiungi"):
             if subj_name:
                 st.session_state['subjects_list'].append({"name": subj_name, "hours": subj_hours, "deadline": subj_dead})
                 st.rerun()
@@ -194,11 +194,11 @@ def view_scheduler():
             deadline_text = f"⏳ Entro {s['deadline']}" if s['deadline'] != 'Nessuna' else ''
             st.markdown(f"🔹 **{s['name']}** &mdash; {s['hours']}h <span style='color:#FF9F1C; font-size:0.85rem;'>{deadline_text}</span>", unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🗑️ Pulisci Coda C.S.P."):
+        if st.button("🗑️ Pulisci Coda"):
             st.session_state['subjects_list'] = []
             st.rerun()
 
-    if st.button("✨ Avvia Risoluzione Neuro-Simbolica", use_container_width=True):
+    if st.button("✨ Avvia Pianificazione", use_container_width=True):
         if not st.session_state['subjects_list']:
             st.warning("Nessuna variabile fornita al CSP!")
             return
@@ -228,7 +228,7 @@ def view_scheduler():
                 day_name = days[slot.day_of_week]
                 plan[day_name][slot.start_time] = f"{slot.start_time:02d}:00 - {slot.start_time+1:02d}:00<br><b>{session.subject}</b>"
             st.session_state['study_plan'] = plan
-            st.success("✅ Orizzonti Pianificati! Naviga alla Dashboard per visualizzare l'output.")
+            st.success("✅ Piano Generato! Puoi visualizzarlo nella dashboard.")
         else:
             st.error("❌ Fallimento Backtracking. Riduci il carico o allenta le scadenze!")
             st.session_state['study_plan'] = {}
