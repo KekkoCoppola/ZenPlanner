@@ -1,69 +1,155 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
-  <title>ZenPlanner AI - Live Demo</title>
+  <title>ZenPlanner AI</title>
+  <link rel="icon" type="image/png" href="assets/ZenPlannerLogo.png">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body, html {
-      margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background-color: #1a1a2e;
-      font-family: 'Poppins', sans-serif; color: #E2E8F0;
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #1a1a2e;
+      font-family: 'Poppins', sans-serif;
+      color: #E2E8F0;
     }
-    #root { width: 100%; height: 100%; }
-    
+
+    #root {
+      width: 100%;
+      height: 100%;
+    }
+
     .loading-overlay {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: radial-gradient(circle at 10% 20%, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      z-index: 1000; transition: opacity 1s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 1s ease;
     }
-    
-    .loading-container { width: 90%; max-width: 500px; text-align: center; }
+
+    .loading-container {
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+    }
 
     .logo-glow {
-      filter: drop-shadow(0 0 15px rgba(0,229,255,0.4));
-      margin-bottom: 25px; animation: pulse 2s infinite ease-in-out;
+      filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.4));
+      margin-bottom: 25px;
+      animation: pulse 2s infinite ease-in-out;
     }
 
     @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.03); opacity: 0.8; }
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.03);
+        opacity: 0.8;
+      }
     }
-    
+
     .progress-wrapper {
-      width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 20px;
-      margin: 20px 0 10px 0; overflow: hidden; position: relative;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      margin: 20px 0 10px 0;
+      overflow: hidden;
+      position: relative;
     }
+
     .progress-bar {
-      width: 0%; height: 100%; background: linear-gradient(90deg, #00E5FF, #7209b7);
-      border-radius: 20px; transition: width 0.3s ease;
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #00E5FF, #7209b7);
+      border-radius: 20px;
+      transition: width 0.3s ease;
     }
-    
-    .status-msg { font-size: 0.85rem; height: 20px; opacity: 0.9; color: #00E5FF; font-weight: 600; }
+
+    .status-msg {
+      font-size: 0.85rem;
+      height: 20px;
+      opacity: 0.9;
+      color: #00E5FF;
+      font-weight: 600;
+    }
 
     /* Registro dei LOG tecnici a schermo */
     .log-terminal {
-      width: 100%; max-height: 120px; background: rgba(0,0,0,0.5); border-radius: 8px;
-      margin-top: 25px; padding: 10px; font-family: monospace; font-size: 0.7rem;
-      text-align: left; color: #88c9ff; overflow-y: auto; text-shadow: 0 0 5px rgba(0,229,255,0.2);
-      border: 1px solid rgba(255,255,255,0.05);
+      width: 100%;
+      max-height: 120px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 8px;
+      margin-top: 25px;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 0.7rem;
+      text-align: left;
+      color: #88c9ff;
+      overflow-y: auto;
+      text-shadow: 0 0 5px rgba(0, 229, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
-    .log-line { border-bottom: 1px solid rgba(255,255,255,0.03); padding: 2px 0; }
+
+    .log-line {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 2px 0;
+    }
 
     .error-card {
-      background: rgba(255, 71, 87, 0.15); border: 1px solid #ff4757;
-      border-radius: 12px; padding: 25px; text-align: left; margin-top: 25px;
+      background: rgba(255, 71, 87, 0.15);
+      border: 1px solid #ff4757;
+      border-radius: 12px;
+      padding: 25px;
+      text-align: left;
+      margin-top: 25px;
       box-shadow: 0 8px 32px rgba(255, 71, 87, 0.2);
     }
-    .error-card code { background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; color: #ff6b81; font-size: 0.8rem; display: block; margin: 15px 0; overflow-x: auto; white-space: pre-wrap; }
-    
+
+    .error-card code {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border-radius: 8px;
+      color: #ff6b81;
+      font-size: 0.8rem;
+      display: block;
+      margin: 15px 0;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
     .btn-retry {
-      background: #00E5FF; color: #1a1a2e; border: none; padding: 12px 25px;
-      border-radius: 8px; font-weight: 800; cursor: pointer; transition: transform 0.2s;
+      background: #00E5FF;
+      color: #1a1a2e;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 8px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.2s;
     }
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@800&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@800&family=Poppins:wght@400;600&display=swap"
+    rel="stylesheet">
 </head>
+
 <body>
 
   <!-- Capturing Console Logs to show real progress -->
@@ -71,35 +157,35 @@
     const logBuffer = [];
     const originalLog = console.log;
     const originalError = console.error;
-    
+
     function updateTerminal(msg) {
-        const terminal = document.getElementById('log-terminal');
-        if (terminal) {
-            const line = document.createElement('div');
-            line.className = 'log-line';
-            line.innerText = `> ${msg.substring(0, 80)}${msg.length > 80 ? '...' : ''}`;
-            terminal.appendChild(line);
-            terminal.scrollTop = terminal.scrollHeight;
-        }
+      const terminal = document.getElementById('log-terminal');
+      if (terminal) {
+        const line = document.createElement('div');
+        line.className = 'log-line';
+        line.innerText = `> ${msg.substring(0, 80)}${msg.length > 80 ? '...' : ''}`;
+        terminal.appendChild(line);
+        terminal.scrollTop = terminal.scrollHeight;
+      }
     }
 
-    console.log = function() {
-        originalLog.apply(console, arguments);
-        const msg = Array.from(arguments).join(' ');
-        updateTerminal(msg);
-        
-        // Se intercettiamo parole chiave dei download pip
-        if (msg.includes("Downloading") || msg.includes("Extracting")) {
-            const status = document.getElementById('status');
-            if (status) status.innerText = "Installazione: " + (msg.match(/([a-zA-Z0-9.\-_]+.whl)/)?.[0] || "pacchetto Python");
-        }
+    console.log = function () {
+      originalLog.apply(console, arguments);
+      const msg = Array.from(arguments).join(' ');
+      updateTerminal(msg);
+
+      // Se intercettiamo parole chiave dei download pip
+      if (msg.includes("Downloading") || msg.includes("Extracting")) {
+        const status = document.getElementById('status');
+        if (status) status.innerText = "Installazione: " + (msg.match(/([a-zA-Z0-9.\-_]+.whl)/)?.[0] || "pacchetto Python");
+      }
     };
-    console.error = function() {
-        originalError.apply(console, arguments);
-        updateTerminal("ERR: " + Array.from(arguments).join(' '));
+    console.error = function () {
+      originalError.apply(console, arguments);
+      updateTerminal("ERR: " + Array.from(arguments).join(' '));
     };
 
-    window.onerror = function(msg, url, lineNo, columnNo, error) {
+    window.onerror = function (msg, url, lineNo, columnNo, error) {
       const container = document.getElementById('error-container');
       if (container) {
         container.innerHTML = `
@@ -117,26 +203,27 @@
   <div id="loading" class="loading-overlay">
     <div class="loading-container">
       <img src="assets/ZenPlannerLogo.png" id="logo" class="logo-glow" width="120" alt="Logo">
-      <h2 style="font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: 1.5px; margin: 0; color: #FFF;">ZENPLANNER AI</h2>
-      
+      <h2 style="font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: 1.5px; margin: 0; color: #FFF;">
+        ZENPLANNER AI</h2>
+
       <div class="progress-wrapper">
         <div id="pbar" class="progress-bar"></div>
       </div>
       <div id="status" class="status-msg">Connessione a Pyodide...</div>
-      
+
       <div id="log-terminal" class="log-terminal">
-         <div class="log-line">Initializing WebAssembly Machine...</div>
+        <div class="log-line">Initializing WebAssembly Machine...</div>
       </div>
 
       <div id="error-container"></div>
     </div>
   </div>
-  
+
   <div id="root"></div>
 
   <!-- stlite 0.74.x - Molto più rapido nei download e caching dei wheel -->
   <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.74.0/build/stlite.js"></script>
-  
+
   <script>
     const statusEl = document.getElementById('status');
     const pbar = document.getElementById('pbar');
@@ -144,7 +231,7 @@
     async function initZenPlanner() {
       const files = {
         "src/api_dashboard/app.py": { url: "src/api_dashboard/app.py" },
-        "src/csp_scheduler/__init__.py": "", 
+        "src/csp_scheduler/__init__.py": "",
         "src/csp_scheduler/domain.py": { url: "src/csp_scheduler/domain.py" },
         "src/csp_scheduler/csp.py": { url: "src/csp_scheduler/csp.py" },
         "src/csp_scheduler/constraints.py": { url: "src/csp_scheduler/constraints.py" },
@@ -158,11 +245,51 @@
       };
 
       try {
-        pbar.style.width = "10%";
-        
         // Lancio stlite con caching migliorato
+        pbar.style.width = "10%";
+        let prg = 10;
+        const timer = setInterval(() => {
+          if (prg < 98) {
+            // Avanzamento lento per riflettere l'installazione dei pacchetti giganti
+            prg += (prg < 40) ? 0.3 : 0.05;
+            pbar.style.width = prg + "%";
+          }
+        }, 500);
+
+        const onAppReady = () => {
+          clearInterval(timer);
+          pbar.style.width = "100%";
+          statusEl.innerText = "Benvenuto in ZenPlanner!";
+          setTimeout(() => {
+            const loadingEl = document.getElementById('loading');
+            if (loadingEl) {
+              loadingEl.style.opacity = '0';
+              setTimeout(() => {
+                loadingEl.remove();
+                // Ripristiniamo i console log originali per non sporcare la dashboard
+                console.log = originalLog;
+                console.error = originalError;
+              }, 1000);
+            }
+          }, 800);
+        };
+
+        const observer = new MutationObserver((mutations, obs) => {
+          if (document.querySelector('[data-testid="stApp"]')) {
+            onAppReady();
+            obs.disconnect();
+          }
+        });
+        observer.observe(document.getElementById('root'), { childList: true, subtree: true });
+
+        // Controllo immediato nel caso fosse già pronto
+        if (document.querySelector('[data-testid="stApp"]')) {
+          onAppReady();
+          observer.disconnect();
+        }
+
         await stlite.mount({
-          requirements: ["pandas", "scikit-learn"], 
+          requirements: ["pandas", "scikit-learn"],
           entrypoint: "src/api_dashboard/app.py",
           files: files,
           streamlitConfig: {
@@ -172,33 +299,6 @@
           }
         }, document.getElementById("root"));
 
-        let prg = 10;
-        const timer = setInterval(() => {
-          if (prg < 98) {
-             // Avanzamento lento per riflettere l'installazione dei pacchetti giganti
-             prg += (prg < 40) ? 0.3 : 0.05; 
-             pbar.style.width = prg + "%";
-          }
-        }, 500);
-
-        const observer = new MutationObserver((mutations, obs) => {
-          if (document.querySelector('iframe')) {
-            clearInterval(timer);
-            pbar.style.width = "100%";
-            statusEl.innerText = "Benvenuto in ZenPlanner!";
-            setTimeout(() => {
-              document.getElementById('loading').style.opacity = '0';
-              setTimeout(() => {
-                  document.getElementById('loading').remove();
-                  // Ripristiniamo i console log originali per non sporcare la dashboard
-                  console.log = originalLog;
-                  console.error = originalError;
-              }, 1000);
-            }, 800);
-            obs.disconnect();
-          }
-        });
-        observer.observe(document.getElementById('root'), { childList: true, subtree: true });
 
       } catch (err) {
         console.error("Critical Stlite Failure:", err);
@@ -210,4 +310,5 @@
     else window.addEventListener('load', () => window.stlite && initZenPlanner());
   </script>
 </body>
+
 </html>
