@@ -2,12 +2,12 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>ZenPlanner - Live Demo</title>
+  <title>ZenPlanner AI - Live Demo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body, html {
       margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background-color: #1a1a2e;
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Poppins', sans-serif; color: #E2E8F0;
     }
     #root { width: 100%; height: 100%; }
     
@@ -15,22 +15,19 @@
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       background: radial-gradient(circle at 10% 20%, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      color: #00E5FF; z-index: 1000; transition: opacity 1s ease;
+      z-index: 1000; transition: opacity 1s ease;
     }
     
-    .loading-container {
-      width: 80%; max-width: 400px; text-align: center;
-    }
+    .loading-container { width: 85%; max-width: 450px; text-align: center; }
 
     .logo-glow {
       filter: drop-shadow(0 0 15px rgba(0,229,255,0.4));
-      margin-bottom: 25px;
-      animation: pulse 2s infinite ease-in-out;
+      margin-bottom: 25px; animation: pulse 2s infinite ease-in-out;
     }
 
     @keyframes pulse {
       0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.05); opacity: 0.8; }
+      50% { transform: scale(1.03); opacity: 0.8; }
     }
     
     .progress-wrapper {
@@ -39,31 +36,57 @@
     }
     .progress-bar {
       width: 0%; height: 100%; background: linear-gradient(90deg, #00E5FF, #7209b7);
-      border-radius: 20px; transition: width 0.3s ease;
+      border-radius: 20px; transition: width 0.4s ease;
     }
     
-    .status-msg { color: #E2E8F0; font-size: 0.85rem; height: 20px; opacity: 0.7; }
+    .status-msg { font-size: 0.85rem; height: 20px; opacity: 0.7; color: #00E5FF; }
 
-    .error-box {
-      background: rgba(255, 71, 87, 0.1); border: 1px solid #ff4757;
-      border-radius: 12px; padding: 20px; text-align: left; margin-top: 20px;
-      color: #E2E8F0;
+    .error-card {
+      background: rgba(255, 71, 87, 0.15); border: 1px solid #ff4757;
+      border-radius: 12px; padding: 25px; text-align: left; margin-top: 25px;
+      box-shadow: 0 8px 32px rgba(255, 71, 87, 0.2);
     }
-    .error-box code { background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; color: #ff6b81; font-size: 0.8rem; }
+    .error-card h3 { color: #ff4757; margin-top: 0; }
+    .error-card code { background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; color: #ff6b81; font-size: 0.8rem; display: block; margin: 15px 0; overflow-x: auto; white-space: pre-wrap; }
+    
+    .btn-retry {
+      background: #00E5FF; color: #1a1a2e; border: none; padding: 12px 25px;
+      border-radius: 8px; font-weight: 800; cursor: pointer; transition: transform 0.2s;
+    }
+    .btn-retry:hover { transform: scale(1.05); }
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@800&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
+  <!-- Captura Errores Globales -->
+  <script>
+    window.onerror = function(msg, url, lineNo, columnNo, error) {
+      const container = document.getElementById('error-container');
+      if (container) {
+        container.innerHTML = `
+          <div class="error-card">
+            <h3>🛑 Errore di Runtime</h3>
+            <p>Il caricamento si è interrotto bruscamente:</p>
+            <code>${msg}\n(Riga: ${lineNo}, Col: ${columnNo})</code>
+            <button class="btn-retry" onclick="window.location.reload()">Ricarica Pagina</button>
+          </div>
+        `;
+        const loader = document.getElementById('status');
+        if (loader) loader.innerText = "Inizializzazione fallita.";
+      }
+      return false;
+    };
+  </script>
+
   <div id="loading" class="loading-overlay">
     <div class="loading-container">
-      <!-- Path Aggiornato: ora siamo in root -->
-      <img src="assets/ZenPlannerLogo.png" class="logo-glow" width="140" alt="Logo">
-      <h2 style="font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: 1px; margin: 0;">ZENPLANNER AI</h2>
+      <img src="assets/ZenPlannerLogo.png" id="logo" class="logo-glow" width="130" alt="Logo">
+      <h2 style="font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: 2px; margin: 0; color: #FFF;">ZENPLANNER AI</h2>
       
       <div class="progress-wrapper">
         <div id="pbar" class="progress-bar"></div>
       </div>
-      <div id="status" class="status-msg">Inizializzazione...</div>
+      <div id="status" class="status-msg">Avvio in corso...</div>
       
       <div id="error-container"></div>
     </div>
@@ -71,128 +94,91 @@
   
   <div id="root"></div>
 
-  <!-- Versione stlite più recente e stabile per evitare freeze in WASM -->
-  <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.52.1/build/stlite.js"></script>
+  <!-- Caricamento stlite-mountable (usiamo una versione stabile specifica) -->
+  <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.58.1/build/stlite.js"></script>
+  
   <script>
     const statusEl = document.getElementById('status');
     const pbar = document.getElementById('pbar');
-    const errorContainer = document.getElementById('error-container');
 
-    // Lista file da verificare prima del boot di stlite
-    const filesToFetch = [
-      { name: "Core Engine", url: "src/api_dashboard/app.py" },
-      { name: "Domain Logic", url: "src/csp_scheduler/domain.py" },
-      { name: "CSP Framework", url: "src/csp_scheduler/csp.py" },
-      { name: "Constraints Engine", url: "src/csp_scheduler/constraints.py" },
-      { name: "AI Solver", url: "src/csp_scheduler/solver.py" },
-      { name: "Orchestrator", url: "src/csp_scheduler/scheduler.py" },
-      { name: "ML Model (3MB)", url: "src/ml_pipeline/models/tuned_best_model.pkl" },
-      { name: "ML Scaler", url: "src/ml_pipeline/models/scaler.pkl" },
-      { name: "ML Features", url: "src/ml_pipeline/models/model_features.pkl" }
-    ];
-
-    async function startApp() {
-      console.log("🚀 Starting ZenPlanner initialization sequence...");
+    async function initZenPlanner() {
+      console.log("🛠️ Inizializzazione ZenPlanner...");
       
-      // 1. Fase Download File (0% -> 40%)
-      let loaded = 0;
-      for (const file of filesToFetch) {
-        statusEl.innerText = `Controllo: ${file.name}...`;
-        try {
-          const r = await fetch(file.url, { method: 'HEAD' }); // Solo test esistenza per velocità
-          if (!r.ok) throw new Error(`HTTP ${r.status}`);
-          loaded++;
-          pbar.style.width = `${(loaded / filesToFetch.length) * 40}%`;
-        } catch (e) {
-          console.error(`❌ Failed to fetch ${file.name}:`, e);
-          showError(file.name, file.url, e);
-          return;
-        }
-      }
-
-      // 2. Fase Boot WASM (40% -> 90%)
-      statusEl.innerText = "Caricamento ambiente Python (WASM)...";
-      pbar.style.width = "45%";
+      // Definiamo i file critici
+      const files = {
+        "src/api_dashboard/app.py": { url: "src/api_dashboard/app.py" },
+        "src/csp_scheduler/__init__.py": "", 
+        "src/csp_scheduler/domain.py": { url: "src/csp_scheduler/domain.py" },
+        "src/csp_scheduler/csp.py": { url: "src/csp_scheduler/csp.py" },
+        "src/csp_scheduler/constraints.py": { url: "src/csp_scheduler/constraints.py" },
+        "src/csp_scheduler/solver.py": { url: "src/csp_scheduler/solver.py" },
+        "src/csp_scheduler/scheduler.py": { url: "src/csp_scheduler/scheduler.py" },
+        "src/ml_pipeline/__init__.py": "",
+        "src/ml_pipeline/models/tuned_best_model.pkl": { url: "src/ml_pipeline/models/tuned_best_model.pkl" },
+        "src/ml_pipeline/models/scaler.pkl": { url: "src/ml_pipeline/models/scaler.pkl" },
+        "src/ml_pipeline/models/model_features.pkl": { url: "src/ml_pipeline/models/model_features.pkl" },
+        "assets/ZenPlannerLogo.png": { url: "assets/ZenPlannerLogo.png" }
+      };
 
       try {
-        stlite.mount({
-          requirements: ["pandas", "scikit-learn", "joblib"], 
+        pbar.style.width = "20%";
+        statusEl.innerText = "Configurazione Virtual Machine...";
+
+        // Lancio stlite
+        await stlite.mount({
+          requirements: ["pandas", "scikit-learn"], 
           entrypoint: "src/api_dashboard/app.py",
-          files: {
-            "src/api_dashboard/app.py": { url: "src/api_dashboard/app.py" },
-            "src/csp_scheduler/__init__.py": "", 
-            "src/csp_scheduler/domain.py": { url: "src/csp_scheduler/domain.py" },
-            "src/csp_scheduler/csp.py": { url: "src/csp_scheduler/csp.py" },
-            "src/csp_scheduler/constraints.py": { url: "src/csp_scheduler/constraints.py" },
-            "src/csp_scheduler/solver.py": { url: "src/csp_scheduler/solver.py" },
-            "src/csp_scheduler/scheduler.py": { url: "src/csp_scheduler/scheduler.py" },
-            "src/ml_pipeline/__init__.py": "",
-            "src/ml_pipeline/models/tuned_best_model.pkl": { url: "src/ml_pipeline/models/tuned_best_model.pkl" },
-            "src/ml_pipeline/models/scaler.pkl": { url: "src/ml_pipeline/models/scaler.pkl" },
-            "src/ml_pipeline/models/model_features.pkl": { url: "src/ml_pipeline/models/model_features.pkl" },
-            "assets/ZenPlannerLogo.png": { url: "assets/ZenPlannerLogo.png" }
+          files: files,
+          streamlitConfig: {
+            "server.baseUrlPath": "/ZenPlanner/", // Opzionale per GH Pages
+            "theme.base": "dark",
+            "theme.primaryColor": "#00E5FF"
           }
-        }, document.getElementById("root")).catch(err => {
-          statusEl.innerText = "Errore durante il boot di stlite.";
-          console.error("Mount error:", err);
-          showError("stlite Engine", "WASM Mount", err);
+        }, document.getElementById("root"));
+
+        // Monitoraggio progressivo
+        let prg = 20;
+        const timer = setInterval(() => {
+          if (prg < 95) {
+            prg += 0.5;
+            pbar.style.width = prg + "%";
+            if (prg > 40) statusEl.innerText = "Download pacchetti scientifici...";
+            if (prg > 80) statusEl.innerText = "Compilazione Python (WASM)...";
+          }
+        }, 600);
+
+        // Controllo comparsa iframe (app pronta)
+        const observer = new MutationObserver((mutations, obs) => {
+          const iframe = document.querySelector('iframe');
+          if (iframe) {
+            clearInterval(timer);
+            pbar.style.width = "100%";
+            statusEl.innerText = "Pronto!";
+            console.log("✅ ZenPlanner Caricato con Successo.");
+            setTimeout(() => {
+              document.getElementById('loading').style.opacity = '0';
+              setTimeout(() => document.getElementById('loading').remove(), 1000);
+            }, 1000);
+            obs.disconnect();
+          }
         });
+        observer.observe(document.getElementById('root'), { childList: true, subtree: true });
+
       } catch (err) {
-        statusEl.innerText = "Errore fatale all'istanziazione script.";
-        console.error("Fatal error:", err);
+        console.error("❌ Stlite Mount Error:", err);
+        throw err; // Verrà catturato da window.onerror
       }
-
-      // Simulazione avanzamento mentre Streamlit carica in background
-      let progress = 45;
-      const interval = setInterval(() => {
-        if (progress < 95) {
-          progress += 0.4;
-          pbar.style.width = progress + "%";
-          if (progress > 60) statusEl.innerText = "Download pacchetti scientifici (Pandas/Scikit)...";
-          if (progress > 85) statusEl.innerText = "Rendering interfaccia ZenPlanner...";
-        }
-      }, 800);
-
-      // 3. Fase Finale (quando appare l'iframe)
-      const observer = new MutationObserver((mutations) => {
-        for (const m of mutations) {
-          if (m.addedNodes) {
-            for (const n of m.addedNodes) {
-              if (n.tagName === 'IFRAME') {
-                clearInterval(interval);
-                pbar.style.width = "100%";
-                statusEl.innerText = "Benvenuto!";
-                console.log("✅ ZenPlanner is live!");
-                setTimeout(() => {
-                  document.getElementById('loading').style.opacity = '0';
-                  setTimeout(() => document.getElementById('loading').remove(), 1000);
-                }, 1000);
-                observer.disconnect();
-              }
-            }
-          }
-        }
-      });
-      observer.observe(document.getElementById('root'), { childList: true });
     }
 
-    function showError(name, url, err) {
-      pbar.style.background = "#ff4757";
-      pbar.style.width = "100%";
-      statusEl.innerText = "Inizializzazione Fallita.";
-      errorContainer.innerHTML = `
-        <div class="error-box">
-          <b style="color:#ff4757">Asset non raggiungibile o Errore Browser</b><br>
-          File: <code>${name}</code><br>
-          Errore: <code>${err.message || err}</code><br><br>
-          <small>Se sei in locale, usa <code>python serve.py</code>. Se sei su GitHub, svuota la cache del browser e riprova.</small>
-          <br><br>
-          <button onclick="window.location.reload()" style="background:#00E5FF; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">Ricarica Pagina</button>
-        </div>
-      `;
+    // Avvio effettivo
+    if (window.stlite) {
+      initZenPlanner();
+    } else {
+      setTimeout(() => {
+        if (window.stlite) initZenPlanner();
+        else throw new Error("Libreria stlite.js non caricata dal CDN. Controlla la connessione.");
+      }, 2000);
     }
-
-    startApp();
   </script>
 </body>
 </html>
