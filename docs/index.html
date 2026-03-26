@@ -78,7 +78,30 @@
         "src/ml_pipeline/models/model_features.pkl": { url: "../src/ml_pipeline/models/model_features.pkl" },
         "assets/ZenPlannerLogo.png": { url: "../assets/ZenPlannerLogo.png" }
       }
-    }, document.getElementById("root"));
+    }, document.getElementById("root")).catch((err) => {
+      const loader = document.getElementById('loading');
+      if (loader) {
+        let errorMsg = err.message || err.toString();
+        let errorHtml = `<div style="background: rgba(255,0,0,0.1); border: 2px solid #ff4757; padding: 25px; border-radius: 12px; margin-top:20px; box-shadow: 0 4px 15px rgba(255,71,87,0.2);">
+          <h3 style="color: #ff4757; margin-top:0;">🛑 Errore di Caricamento (Virtual File System)</h3>
+          <p style="color: #E2E8F0; margin-bottom: 5px;">Non è stato possibile scaricare od avviare le risorse Python.</p>
+          <code style="color: #ff6b81; display:block; padding: 12px; background: rgba(0,0,0,0.4); border-radius: 8px; font-size: 0.85rem; font-family: monospace;">${errorMsg}</code>
+        </div>`;
+        
+        if (window.location.protocol === 'file:') {
+            errorHtml += `<div style="margin-top:20px; padding: 20px; background: rgba(255, 159, 28, 0.1); border-left: 5px solid #FF9F1C; border-radius: 0 8px 8px 0;">
+              <h4 style="color:#FF9F1C; margin-top:0; font-size: 1.1rem;">⚠️ Avvio Locale non supportato (CORS)</h4>
+              <p style="color:#E2E8F0; font-size: 0.95rem; line-height: 1.5;">Per motivi di sicurezza, i browser moderni <b>impediscono</b> il fetch () di altri file locali (come Python e Modelli) quando apri banalmente l'HTML con doppio clic.<br><br>
+              Per testare la Demo Locale, devi avviare un micro-server. Apri il terminale alla root e lancia:<br>
+              <code style="background: rgba(0,229,255,0.1); color: #00E5FF; padding: 5px 10px; border-radius: 4px; display:inline-block; margin-top:10px;">python docs/serve.py</code></p>
+            </div>`;
+        }
+        
+        loader.innerHTML = errorHtml + `<button onclick="window.location.reload()" style="margin-top:25px; padding:12px 25px; border-radius:8px; border:none; background:#00E5FF; color:#0c0c14; font-weight:800; cursor:pointer; font-family:'Poppins', sans-serif;">🔄 Riprova il Caricamento</button>`;
+        loader.style.justifyContent = 'flex-start';
+        loader.style.paddingTop = '10vh';
+      }
+    });
 
     // Script UX per rimuovere l'overlay di caricamento una volta che Streamlit ha agganciato l'iframe base
     const observer = new MutationObserver((mutations) => {
