@@ -1,49 +1,51 @@
 <p align="center">
-  <img src="assets/ZenPlannerLogo.png" width="180">
+  <img src="assets/ZenPlannerLogo.png" width="220" alt="ZenPlanner Logo">
 </p>
-<p>
-  <a href="https://kekkocoppola.github.io/ZenPlanner/">
-    <img src="https://img.shields.io/badge/LIVE_DEMO-ZENPLANNER-2ea44f?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=1a1a1a" alt="Live Demo" />
-  </a>
-</p>
-<h1 align="center">ZenPlanner</h1>
+
+<h1 align="center">🧘 ZenPlanner</h1>
 
 <p align="center">
-  <b>Scheduler Adattivo Intelligente</b><br>
-  Machine Learning · Constraint Satisfaction · Streamlit Dashboard
+  <b>Scheduler Adattivo Intelligente per Studenti</b><br>
+  <i>Ottimizzazione del tempo, prevenzione dello stress e Machine Learning</i>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/license/KekkoCoppola/ZenPlanner?style=flat-square&color=5D5CDE" alt="License" />
+  <img src="https://img.shields.io/github/stars/KekkoCoppola/ZenPlanner?style=flat-square&color=5D5CDE" alt="Stars" />
+  <img src="https://img.shields.io/github/languages/top/KekkoCoppola/ZenPlanner?style=flat-square&color=5D5CDE" alt="Top Language" />
+  <img src="https://img.shields.io/badge/Python-3.9+-blue?style=flat-square&logo=python&logoColor=white" alt="Python Version" />
 </p>
 
 ---
 
-## 👥 Team
+## 🚀 Prova l'App
 
-Le menti dietro ZenPlanner. Studenti di Informatica presso l'Università degli Studi di Salerno.
+Vuoi vedere ZenPlanner in azione? Accedi alla demo live direttamente nel tuo browser:
 
-<table align="center">
-  <tr>
-    <td align="center">
-      <img src="https://github.com/KekkoCoppola.png" width="100px;" alt="" style="border-radius: 50%;"/><br />
-      <sub><b>Francesco Coppola</b></sub><br />
-      <a href="https://github.com/KekkoCoppola" title="GitHub">💻 GitHub</a>
-    </td>
-        <td align="center">
-      <!-- o -->
-      <img src="https://github.com/rosx3.png" width="100px;" alt="" style="border-radius: 50%;"/><br />
-      <sub><b>Rosaria Cervino</b></sub><br />
-      <a href="https://github.com/rosx3" title="GitHub">💻 GitHub</a>
-    </td>
-        <td align="center">
-      <!--  -->
-      <img src="https://github.com/elesshhhh.png" width="100px;" alt="" style="border-radius: 50%;"/><br />
-      <sub><b>Elena Carlomagno</b></sub><br />
-      <a href="https://github.com/elesshhhh" title="GitHub">💻 GitHub</a>
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <a href="https://kekkocoppola.github.io/ZenPlanner/">
+    <img src="https://img.shields.io/badge/APRI_ZENPLANNER-LIVE_DEMO-2ea44f?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=1a1a1a" alt="Live Demo" />
+  </a>
+</p>
 
-## Architettura Ibrida: Oracolo ML → CSP Engine
+---
 
-Il core del progetto si basa su un'interazione **bidirezionale** tra due motori:
+## 🌟 Visione del Progetto
+
+ZenPlanner non è un semplice calendario. È un assistente basato su **Intelligenza Artificiale** progettato per bilanciare il carico accademico con il benessere mentale. Attraverso un modello di **Machine Learning** (Random Forest Regressor) analizziamo il tuo profilo di stress e adattiamo dinamicamente un motore di **Constraint Satisfaction Problem (CSP)** per generare il piano di studio perfetto per te.
+
+### ✨ Caratteristiche Principali
+
+- 🧠 **Oracolo ML**: Predizione del burnout basata su 13 feature comportamentali.
+- ⚙️ **Motore CSP Adattivo**: Generazione di scheduling con euristiche Fail-First (MRV) e Least Constraining Value (LCV).
+- 🛡️ **Zen Gaps**: Inserimento automatico di pause basato sul tuo livello di stress predetto.
+- 📊 **Dashboard Interattiva**: Gestione intuitiva di task, scadenze e priorità in tempo reale.
+
+---
+
+## 🏗️ Architettura Ibrida
+
+Il core del progetto si basa su un'interazione **bidirezionale** tra l'analisi predittiva e la risoluzione dei vincoli:
 
 ```mermaid
 graph TB
@@ -70,157 +72,83 @@ graph TB
     SOLVER -->|"Piano Settimanale Ottimizzato"| Frontend
 ```
 
-1. **Oracolo ML (Machine Learning Gatekeeper)**: Agisce alla radice dell'albero di ricerca. Valutando olisticamente il profilo studente e il monte ore totale richiesto, effettua una **predizione dello stress a monte**. Se rileva rischio di burnout, innesca un meccanismo di *Hyperparameter Tuning* automatico per il CSP, imponendo vincoli geometrici più stringenti (es. restringendo il Tetto Giornaliero Massimo e le Ore Consecutive) per forzare matematicamente la diluizione della fatica.
+### 🧠 Dettagli del Motore CSP
 
-2. **CSP Scheduler (Constraint Satisfaction Problem)**: Attraverso algoritmi di ricerca (Backtracking DFS con Forward Checking ed euristiche MRV/LCV), il CSP esplora le combinazioni temporali per allocare le sessioni di studio. Garantisce un piano corretto rispettando vincoli strutturali (hard constraints) come scadenze, nessuna sovrapposizione e tetto massimo dinamico.
-
----
-
-## Struttura Algoritmica Dettagliata
-
-### `src/csp_scheduler/` — Algorithm Layer
-
-| File | Ruolo | Dettaglio Tecnico |
-|------|-------|-------------------|
-| **`domain.py`** | Modelli di Dominio | Definisce `UserProfile` (13 feature ML + soglie), `TimeSlot` (variabile atomica immutabile giorno×ora), `StudySession` (variabile CSP con subject, priority, deadline) |
-| **`csp.py`** | Framework CSP Generico | Classe astratta `Constraint[V, D]` con metodo `satisfied()`. Classe `CSP[V, D]` che gestisce Variabili, Domini e coda di Vincoli con `consistent()` per Forward Checking |
-| **`constraints.py`** | Hard Constraints | 4 vincoli implementati (vedi tabella sotto) |
-| **`solver.py`** | Motore di Ricerca AI | DFS Backtracking con euristiche MRV e LCV (vedi sotto) |
-| **`scheduler.py`** | Facade Orchestratrice | `ZenSchedulerEngine`: carica modelli ML, esegue predizione, calibra iperparametri, istanzia il CSP e lancia il solver |
-
-#### Vincoli Implementati (`constraints.py`)
-
-| Constraint | Tipo | Descrizione |
-|------------|------|-------------|
-| `NoOverlapConstraint` | Hard | Previene accavallamenti temporali tra sessioni (unicità degli slot assegnati) |
-| `DeadlineConstraint` | Hard | Garantisce che ogni materia sia completata entro la data dell'esame (`day_of_week ≤ deadline_day`) |
-| `DailyMaxHoursConstraint` | Hard | Limita le ore di studio assegnate per singolo giorno. **Parametro `max_hours` dinamicamente tunato dall'ML** |
-| `MaxConsecutiveConstraint` | Hard | Impedisce più di `N` ore consecutive senza pausa, forzando "Zen Gaps" nel calendario. **`max_consec` è settato a 1h sotto stress alto, 2h altrimenti** |
-
-#### Euristiche del Solver (`solver.py`)
-
-| Euristica | Fase | Meccanismo |
-|-----------|------|------------|
-| **MRV** (Minimum Remaining Values) | Selezione variabile | Sceglie la sessione con il minor numero di slot legali rimasti → "Fail-First", pruning logico che riduce drasticamente il branching factor |
-| **LCV** (Least Constraining Value) | Ordinamento dominio | Calcola il carico per giorno nel piano parziale e ordina gli slot partendo dai giorni più scarichi → **minimizzazione implicita della varianza settimanale** (anti-cramming) |
-
-#### Flusso del Tuning ML → CSP (`scheduler.py`)
-
-```
-predict_baseline_stress(total_hours) → stress_score (0-10)
-
-if stress > soglia_utente (default 6.0):
-    max_daily_hours -= 2     (minimo 2h/giorno)
-    max_consecutive = 1h     (pausa forzata ogni ora)
-else:
-    max_consecutive = 2h     (distribuzione standard)
-    
-→ iniezione automatica vincoli calibrati nel CSP
-```
+| Componente | Funzione | Strategia |
+|:---:|:---|:---|
+| **Variabili** | Slot Temporali | Giorno × Ora (atomico) |
+| **Domini** | Sessioni di Studio | Dinamici in base alla priorità |
+| **Euristica Selezione** | **MRV** | Minimizzazione dei valori residui per pruning veloce |
+| **Euristica Valore** | **LCV** | Minimizzazione della varianza oraria settimanale |
+| **Vincoli** | Hard Constraints | Scadenze, No-Overlap, Daily Max, Contiguità |
 
 ---
 
-### `src/ml_pipeline/` — Data Science & Modelli
-
-| File | Ruolo | Dettaglio Tecnico |
-|------|-------|-------------------|
-| **`preprocess_data.py`** | ETL & Feature Engineering | Outlier Removal, creazione `Work_Rest_Ratio` e `Social_Exercise_Ratio`, One-Hot Encoding coping mechanisms, **Train/Test Split PRIMA dello scaling** (anti data-leakage), `StandardScaler` fittato solo su Train |
-| **`train_model.py`** | Model Selection & Export | Confronto Cross-Validated (5-Fold) tra Ridge, SVR, Random Forest, XGBoost. Esportazione automatica del miglior modello + feature list via `joblib`. Generazione grafici RMSE e Feature Importance |
-| **`retrain_rf.py`** | Quick Retrain | Script dedicato per ri-addestrare rapidamente il Random Forest con iperparametri ottimizzati |
-| **`explainability.py`** | XAI & Interpretabilità | Analisi SHAP per spiegabilità delle predizioni del modello |
-| **`eda.py`** | Analisi Esplorativa | Distribuzioni, correlazioni e statistiche descrittive del dataset |
-
-#### Pipeline ML Completa
-
-```
-Student_Mental_Stress_and_Coping_Mechanisms.csv
-    │
-    ├─ preprocess_data.py
-    │    ├─ Outlier filtering (Study≤80h, Sleep 3-14h)
-    │    ├─ Feature Engineering (+2 ratio features)
-    │    ├─ Drop biased columns (Gender, Medical, Substance)
-    │    ├─ One-Hot Encoding (Coping Mechanisms)
-    │    ├─ Train/Test Split (80/20, seed=42)
-    │    └─ StandardScaler (fit su Train only) → scaler.pkl
-    │
-    ├─ train_model.py
-    │    ├─ 5-Fold CV: Ridge vs SVR vs RF vs XGBoost
-    │    ├─ Best Model Export → tuned_best_model.pkl
-    │    ├─ Feature List → model_features.pkl
-    │    └─ Analytics: RMSE comparison + Feature Importance plots
-    │
-    └─ Output → models/
-         ├─ tuned_best_model.pkl
-         ├─ model_features.pkl
-         └─ scaler.pkl
-```
-
----
-
-### `src/api_dashboard/` — User Interface
-
-| File | Ruolo |
-|------|-------|
-| **`app.py`** | Dashboard Streamlit: login, profilo ML (13 slider), inserimento materie con scadenze, generazione piano via `ZenSchedulerEngine`, visualizzazione calendario settimanale/giornaliero con cards animate e indicatori di stress |
-
----
-
-## Struttura della Repository
-
-```
-ZenPlanner/
-├── assets/                   # Logo e risorse grafiche
-├── data/
-│   ├── *.csv                 # Dataset sorgente
-│   └── processed/            # Train/Test sets processati
-├── analytics/                # Grafici RMSE, Feature Importance, SHAP
-├── src/
-│   ├── ml_pipeline/          # Pipeline Machine Learning
-│   │   ├── preprocess_data.py
-│   │   ├── train_model.py
-│   │   ├── retrain_rf.py
-│   │   ├── explainability.py
-│   │   ├── eda.py
-│   │   └── models/           # Artefatti serializzati (.pkl)
-│   │       ├── tuned_best_model.pkl
-│   │       ├── model_features.pkl
-│   │       └── scaler.pkl
-│   ├── csp_scheduler/        # Motore CSP + Oracolo ML
-│   │   ├── domain.py         # Modelli di Dominio
-│   │   ├── csp.py            # Framework CSP Generico
-│   │   ├── constraints.py    # 4 Hard Constraints
-│   │   ├── solver.py         # DFS Backtracking + MRV + LCV
-│   │   └── scheduler.py      # Facade (ML ↔ CSP)
-│   └── api_dashboard/        # Frontend Streamlit
-│       └── app.py
-├── tests/                    # Test suite (pytest)
-├── .streamlit/               # Configurazione tema Streamlit
-├── requirements.txt
-└── README.md
-```
-
-## Setup Veloce
+## 📁 Struttura della Repository
 
 ```bash
-# 1. Installare le dipendenze
+ZenPlanner/
+├── 📊 analytics/              # Grafici RMSE, Feature Importance e SHAP
+├── 🎨 assets/                 # Brand identity e risorse grafiche
+├── 💾 data/                   # Dataset originali e preprocessati
+├── 📂 src/
+│   ├── 🧠 ml_pipeline/        # Training, Preprocessing e XAI
+│   ├── ⚙️ csp_scheduler/      # Motore CSP e Logic Layer
+│   └── 🖥️ api_dashboard/      # Frontend Streamlit (app.py)
+├── 🧪 tests/                  # Suite di test automatizzati
+└── 📄 requirements.txt        # Dipendenze del progetto
+```
+
+---
+
+## ⚡ Setup Veloce
+
+Per eseguire ZenPlanner localmente, segui questi passaggi:
+
+```bash
+# 1. Clona il repository
+git clone https://github.com/KekkoCoppola/ZenPlanner.git
+cd ZenPlanner
+
+# 2. Installa le dipendenze
 pip install -r requirements.txt
 
-# 2. Preprocessing del dataset e training del modello ML
+# 3. Addestra il modello (necessario al primo avvio)
 python src/ml_pipeline/preprocess_data.py
 python src/ml_pipeline/train_model.py
 
-# 3. Avviare la Dashboard
+# 4. Lancia la Dashboard
 streamlit run src/api_dashboard/app.py
 ```
 
-## Dipendenze Principali
+---
 
-| Libreria | Utilizzo |
-|----------|----------|
-| `pandas`, `numpy` | Data manipulation & numerical operations |
-| `scikit-learn` | StandardScaler, Ridge, SVR, Random Forest, Cross-Validation |
-| `xgboost` | Gradient Boosting Regressor |
-| `matplotlib`, `seaborn` | Grafici analitici e Feature Importance |
-| `joblib` | Serializzazione modelli ML e scaler |
-| `streamlit` | Frontend interattivo e dashboard |
-| `pytest` | Testing automatizzato |
+## 👥 Il Nostro Team
+
+Studenti di Informatica presso l'**Università degli Studi di Salerno**.
+
+<table align="center">
+  <tr>
+    <td align="center">
+      <a href="https://github.com/KekkoCoppola">
+        <img src="https://github.com/KekkoCoppola.png" width="100px;" alt="Francesco Coppola" style="border-radius: 50%; border: 2px solid #5D5CDE;"/><br />
+        <sub><b>Francesco Coppola</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/rosx3">
+        <img src="https://github.com/rosx3.png" width="100px;" alt="Rosaria Cervino" style="border-radius: 50%; border: 2px solid #5D5CDE;"/><br />
+        <sub><b>Rosaria Cervino</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/elesshhhh">
+        <img src="https://github.com/elesshhhh.png" width="100px;" alt="Elena Carlomagno" style="border-radius: 50%; border: 2px solid #5D5CDE;"/><br />
+        <sub><b>Elena Carlomagno</b></sub>
+      </a>
+    </td>
+  </tr>
+</table>
+
+---
+<p align="center">Made with ❤️ by ZenPlanner Team</p>
