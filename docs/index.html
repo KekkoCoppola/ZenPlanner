@@ -3,99 +3,110 @@
 <head>
   <meta charset="UTF-8">
   <title>ZenPlanner - Live Demo</title>
-  <!-- Meta tags for standard PWA / Mobile optimization -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body, html {
-      margin: 0;
-      padding: 0;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      background-color: #1a1a2e; /* Same as the app background to prevent flash */
+      margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background-color: #1a1a2e;
+      font-family: 'Poppins', sans-serif;
     }
-    #root {
-      width: 100%;
-      height: 100%;
+    #root { width: 100%; height: 100%; }
+    
+    .loading-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle at 10% 20%, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: #00E5FF; z-index: 1000; transition: opacity 1s ease;
     }
     
-    /* UX preloader to explain the WASM downloading phase */
-    .loading-overlay {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: radial-gradient(circle at 10% 20%, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #00E5FF;
-      font-family: 'Poppins', sans-serif;
-      z-index: 1000;
-      transition: opacity 1s ease;
+    .loading-container {
+      width: 80%; max-width: 400px; text-align: center;
     }
-    .spinner {
-      width: 50px; height: 50px;
-      border: 5px solid rgba(0, 229, 255, 0.2);
-      border-top-color: #00E5FF;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
+
+    .logo-glow {
+      filter: drop-shadow(0 0 15px rgba(0,229,255,0.4));
+      margin-bottom: 25px;
+      animation: pulse 2s infinite ease-in-out;
     }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+    }
+    
+    .progress-wrapper {
+      width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 20px;
+      margin: 25px 0 10px 0; overflow: hidden; position: relative;
+    }
+    .progress-bar {
+      width: 0%; height: 100%; background: linear-gradient(90deg, #00E5FF, #7209b7);
+      border-radius: 20px; transition: width 0.3s ease;
+    }
+    
+    .status-msg { color: #E2E8F0; font-size: 0.85rem; height: 20px; opacity: 0.7; }
+
+    .error-box {
+      background: rgba(255, 71, 87, 0.1); border: 1px solid #ff4757;
+      border-radius: 12px; padding: 20px; text-align: left; margin-top: 20px;
+      color: #E2E8F0;
+    }
+    .error-box code { background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; color: #ff6b81; }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div id="loading" class="loading-overlay">
-    <div class="spinner"></div>
-    <h2>Caricamento ZenPlanner in WebAssembly...</h2>
-    <p style="color: #E2E8F0; opacity: 0.8; font-size: 0.9rem; text-align: center; max-width: 80%;">
-      Download del motore Python e dei modelli ML in corso.<br>
-      Il primo caricamento richiede alcuni secondi, verrà poi memorizzato in cache!
-    </p>
+    <div class="loading-container">
+      <img src="../assets/ZenPlannerLogo.png" class="logo-glow" width="140" alt="Logo">
+      <h2 style="font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: 1px; margin: 0;">ZENPLANNER AI</h2>
+      
+      <div class="progress-wrapper">
+        <div id="pbar" class="progress-bar"></div>
+      </div>
+      <div id="status" class="status-msg">Inizializzazione...</div>
+      
+      <div id="error-container"></div>
+    </div>
   </div>
+  
   <div id="root"></div>
 
-  <!-- Inclusione libreria stlite (Serverless Streamlit via Pyodide) -->
-  <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.31.1/build/stlite.js"></script>  <script>
-    const filesToFetch = {
-      "src/api_dashboard/app.py": "../src/api_dashboard/app.py",
-      "src/csp_scheduler/domain.py": "../src/csp_scheduler/domain.py",
-      "src/csp_scheduler/csp.py": "../src/csp_scheduler/csp.py",
-      "src/csp_scheduler/constraints.py": "../src/csp_scheduler/constraints.py",
-      "src/csp_scheduler/solver.py": "../src/csp_scheduler/solver.py",
-      "src/csp_scheduler/scheduler.py": "../src/csp_scheduler/scheduler.py",
-      "src/ml_pipeline/models/tuned_best_model.pkl": "../src/ml_pipeline/models/tuned_best_model.pkl",
-      "src/ml_pipeline/models/scaler.pkl": "../src/ml_pipeline/models/scaler.pkl",
-      "src/ml_pipeline/models/model_features.pkl": "../src/ml_pipeline/models/model_features.pkl"
-    };
+  <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.31.1/build/stlite.js"></script>
+  <script>
+    const statusEl = document.getElementById('status');
+    const pbar = document.getElementById('pbar');
+    const errorContainer = document.getElementById('error-container');
 
-    async function checkResources() {
-      const loader = document.getElementById('loading');
-      for (const [name, url] of Object.entries(filesToFetch)) {
+    const filesToFetch = [
+      { name: "Core Engine", url: "../src/api_dashboard/app.py" },
+      { name: "Domain Logic", url: "../src/csp_scheduler/domain.py" },
+      { name: "CSP Framework", url: "../src/csp_scheduler/csp.py" },
+      { name: "Constraints Engine", url: "../src/csp_scheduler/constraints.py" },
+      { name: "AI Solver", url: "../src/csp_scheduler/solver.py" },
+      { name: "Orchestrator", url: "../src/csp_scheduler/scheduler.py" },
+      { name: "ML Pattern Model", url: "../src/ml_pipeline/models/tuned_best_model.pkl" },
+      { name: "ML Scaler", url: "../src/ml_pipeline/models/scaler.pkl" },
+      { name: "ML Features", url: "../src/ml_pipeline/models/model_features.pkl" }
+    ];
+
+    async function startApp() {
+      // 1. Fase Download File (0% -> 40%)
+      let loaded = 0;
+      for (const file of filesToFetch) {
+        statusEl.innerText = `Scaricamento: ${file.name}...`;
         try {
-          const resp = await fetch(url);
-          if (!resp.ok) throw new Error(`Status ${resp.status}`);
-          console.log(`✅ Risorsa caricata: ${name}`);
+          const r = await fetch(file.url);
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          loaded++;
+          pbar.style.width = `${(loaded / filesToFetch.length) * 40}%`;
         } catch (e) {
-          loader.innerHTML = `
-            <div style="background: rgba(255,0,0,0.1); border: 2px solid #ff4757; padding: 25px; border-radius: 12px; margin-top:20px;">
-              <h3 style="color: #ff4757; margin-top:0;">🛑 Errore Critico: File non trovato</h3>
-              <p style="color: #E2E8F0;">Non riesco a trovare il file: <code style="color:#00E5FF;">${name}</code></p>
-              <p style="color: #E2E8F0; font-size: 0.8rem;">Cercato in: ${url}</p>
-              <button onclick="window.location.reload()" style="margin-top:20px; padding:10px 20px; background:#00E5FF; border:none; border-radius:8px; cursor:pointer;">Riprova</button>
-            </div>`;
-          loader.style.justifyContent = 'flex-start';
-          loader.style.paddingTop = '10vh';
-          return false;
+          showError(file.name, file.url);
+          return;
         }
       }
-      return true;
-    }
 
-    async function init() {
-      const ok = await checkResources();
-      if (!ok) return;
+      // 2. Fase Boot WASM (40% -> 90%)
+      statusEl.innerText = "Caricamento ambiente Python (WASM)...";
+      pbar.style.width = "60%";
 
       stlite.mount({
         requirements: ["pandas", "scikit-learn", "joblib"], 
@@ -115,31 +126,57 @@
           "assets/ZenPlannerLogo.png": { url: "../assets/ZenPlannerLogo.png" }
         }
       }, document.getElementById("root")).catch(err => {
+        statusEl.innerText = "Errore fatale all'avvio.";
         console.error(err);
       });
-    }
 
-    init();
+      // Simulazione avanzamento mentre Streamlit carica in background
+      let progress = 60;
+      const interval = setInterval(() => {
+        if (progress < 95) {
+          progress += 0.5;
+          pbar.style.width = progress + "%";
+          if (progress > 80) statusEl.innerText = "Installazione pacchetti scientifici...";
+        }
+      }, 500);
 
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.addedNodes) {
-          for (let node of mutation.addedNodes) {
-            if (node.tagName === 'IFRAME') {
-              setTimeout(() => {
-                const loader = document.getElementById('loading');
-                if (loader) {
-                  loader.style.opacity = '0';
-                  setTimeout(() => loader.remove(), 1000);
-                }
-              }, 2000);
-              observer.disconnect();
+      // 3. Fase Finale (quando appare l'iframe)
+      const observer = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          if (m.addedNodes) {
+            for (const n of m.addedNodes) {
+              if (n.tagName === 'IFRAME') {
+                clearInterval(interval);
+                pbar.style.width = "100%";
+                statusEl.innerText = "Avvio completato!";
+                setTimeout(() => {
+                  document.getElementById('loading').style.opacity = '0';
+                  setTimeout(() => document.getElementById('loading').remove(), 1000);
+                }, 1000);
+                observer.disconnect();
+              }
             }
           }
         }
       });
-    });
-    observer.observe(document.getElementById('root'), { childList: true });
+      observer.observe(document.getElementById('root'), { childList: true });
+    }
+
+    function showError(name, url) {
+      pbar.style.background = "#ff4757";
+      statusEl.innerText = "Errore di rete.";
+      errorContainer.innerHTML = `
+        <div class="error-box">
+          <b style="color:#ff4757">Accesso Negato o File Mancante</b><br>
+          Non riesco a caricare <code>${name}</code>.<br><br>
+          <small>Se sei su GitHub Pages, controlla di non aver impostato la cartella <b>/docs</b> come sorgente nelle impostazioni. Deve essere <b>(root)</b>.</small>
+          <br><br>
+          <button onclick="window.location.reload()" style="background:#00E5FF; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">Riprova</button>
+        </div>
+      `;
+    }
+
+    startApp();
   </script>
 </body>
 </html>
