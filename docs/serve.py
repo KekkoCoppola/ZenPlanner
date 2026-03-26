@@ -15,7 +15,7 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     with socketserver.TCPServer(("", PORT), CustomHTTPRequestHandler) as httpd:
         print(f"\n✅ Server Locale Avviato sulla Root del repository!")
-        print(f"👉 Per testare la demo WebAssembly, clicca qui: http://localhost:{PORT}/demo/")
+        print(f"👉 Per testare la demo WebAssembly, clicca qui: http://localhost:{PORT}/docs/")
         print("Premi CTRL+C per terminare.\n")
         try:
             httpd.serve_forever()
