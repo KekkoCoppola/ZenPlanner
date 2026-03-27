@@ -151,6 +151,16 @@
 </head>
 
 <body>
+  <!-- GitHub Pages Trailing Slash Enforcer -->
+  <script>
+    (function () {
+      const repoName = '/ZenPlanner';
+      const path = window.location.pathname;
+      if (path.endsWith(repoName) && !path.endsWith(repoName + '/')) {
+        window.location.replace(window.location.href.replace(repoName, repoName + '/'));
+      }
+    })();
+  </script>
 
   <!-- Capturing Console Logs to show real progress -->
   <script>
@@ -221,52 +231,66 @@
 
   <div id="root"></div>
 
-  <!-- stlite 0.74.x - Molto più rapido nei download e caching dei wheel -->
-  <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.74.0/build/stlite.js"></script>
+  <!-- stlite 0.75.0 - Più stabile su dispositivi mobile -->
+  <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.75.0/build/stlite.js"></script>
 
   <script>
     const statusEl = document.getElementById('status');
     const pbar = document.getElementById('pbar');
 
     async function initZenPlanner() {
+      // Risoluzione robusta dei percorsi per GitHub Pages
+      const getUrl = (p) => {
+        const loc = window.location;
+        const base = loc.protocol + '//' + loc.host + loc.pathname.replace(/\/$/, '');
+        return `${base}/${p}`;
+      };
+
       const files = {
-        "src/api_dashboard/app.py": { url: "src/api_dashboard/app.py" },
+        "src/api_dashboard/app.py": { url: getUrl("src/api_dashboard/app.py") },
         "src/csp_scheduler/__init__.py": "",
-        "src/csp_scheduler/domain.py": { url: "src/csp_scheduler/domain.py" },
-        "src/csp_scheduler/csp.py": { url: "src/csp_scheduler/csp.py" },
-        "src/csp_scheduler/constraints.py": { url: "src/csp_scheduler/constraints.py" },
-        "src/csp_scheduler/solver.py": { url: "src/csp_scheduler/solver.py" },
-        "src/csp_scheduler/scheduler.py": { url: "src/csp_scheduler/scheduler.py" },
+        "src/csp_scheduler/domain.py": { url: getUrl("src/csp_scheduler/domain.py") },
+        "src/csp_scheduler/csp.py": { url: getUrl("src/csp_scheduler/csp.py") },
+        "src/csp_scheduler/constraints.py": { url: getUrl("src/csp_scheduler/constraints.py") },
+        "src/csp_scheduler/solver.py": { url: getUrl("src/csp_scheduler/solver.py") },
+        "src/csp_scheduler/scheduler.py": { url: getUrl("src/csp_scheduler/scheduler.py") },
         "src/ml_pipeline/__init__.py": "",
-        "src/ml_pipeline/models/tuned_best_model.pkl": { url: "src/ml_pipeline/models/tuned_best_model.pkl" },
-        "src/ml_pipeline/models/scaler.pkl": { url: "src/ml_pipeline/models/scaler.pkl" },
-        "src/ml_pipeline/models/model_features.pkl": { url: "src/ml_pipeline/models/model_features.pkl" },
-        "assets/ZenPlannerLogo.png": { url: "assets/ZenPlannerLogo.png" }
+        "src/ml_pipeline/models/tuned_best_model.pkl": { url: getUrl("src/ml_pipeline/models/tuned_best_model.pkl") },
+        "src/ml_pipeline/models/scaler.pkl": { url: getUrl("src/ml_pipeline/models/scaler.pkl") },
+        "src/ml_pipeline/models/model_features.pkl": { url: getUrl("src/ml_pipeline/models/model_features.pkl") },
+        "assets/ZenPlannerLogo.png": { url: getUrl("assets/ZenPlannerLogo.png") }
       };
 
       try {
-        // Lancio stlite con caching migliorato
         pbar.style.width = "10%";
         let prg = 10;
         const timer = setInterval(() => {
           if (prg < 98) {
-            // Avanzamento lento per riflettere l'installazione dei pacchetti giganti
             prg += (prg < 40) ? 0.3 : 0.05;
             pbar.style.width = prg + "%";
           }
         }, 500);
 
+        // Timeout di cortesia per connessioni lente su mobile
+        const slowLoadTimeout = setTimeout(() => {
+          if (statusEl.innerText.includes("Connessione")) {
+            statusEl.innerText = "Il download dei pacchetti (pandas/sklearn) richiede tempo su mobile...";
+            statusEl.style.color = "#FF9F1C";
+          }
+        }, 15000);
+
         const onAppReady = () => {
           clearInterval(timer);
+          clearTimeout(slowLoadTimeout);
           pbar.style.width = "100%";
           statusEl.innerText = "Benvenuto in ZenPlanner!";
+          statusEl.style.color = "#00E5FF";
           setTimeout(() => {
             const loadingEl = document.getElementById('loading');
             if (loadingEl) {
               loadingEl.style.opacity = '0';
               setTimeout(() => {
                 loadingEl.remove();
-                // Ripristiniamo i console log originali per non sporcare la dashboard
                 console.log = originalLog;
                 console.error = originalError;
               }, 1000);
@@ -282,7 +306,6 @@
         });
         observer.observe(document.getElementById('root'), { childList: true, subtree: true });
 
-        // Controllo immediato nel caso fosse già pronto
         if (document.querySelector('[data-testid="stApp"]')) {
           onAppReady();
           observer.disconnect();
@@ -299,15 +322,34 @@
           }
         }, document.getElementById("root"));
 
-
       } catch (err) {
         console.error("Critical Stlite Failure:", err);
+        statusEl.innerText = "Errore durante il caricamento. Controlla la console.";
+        statusEl.style.color = "#ff4757";
       }
     }
 
-    // Caricamento asincrono
-    if (window.stlite) initZenPlanner();
-    else window.addEventListener('load', () => window.stlite && initZenPlanner());
+    // Caricamento asincrono con fallback
+    if (window.stlite) {
+      initZenPlanner();
+    } else {
+      const checkStlite = setInterval(() => {
+        if (window.stlite) {
+          clearInterval(checkStlite);
+          initZenPlanner();
+        }
+      }, 100);
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          if (window.stlite) {
+            clearInterval(checkStlite);
+            // initZenPlanner già chiamato o in coda
+          } else {
+             console.error("Stlite library failed to load.");
+          }
+        }, 2000);
+      });
+    }
   </script>
 </body>
 
