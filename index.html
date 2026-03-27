@@ -315,6 +315,7 @@
           requirements: ["pandas", "scikit-learn"],
           entrypoint: "src/api_dashboard/app.py",
           files: files,
+          sharedWorker: false, // Disabilita SharedWorker per compatibilità mobile (Safari/iOS)
           streamlitConfig: {
             "server.baseUrlPath": "/ZenPlanner/",
             "theme.base": "dark",
