@@ -312,7 +312,7 @@
         }
 
         await stlite.mount({
-          requirements: ["pandas", "scikit-learn"],
+          requirements: ["pandas", "scikit-learn", "plotly"],
           entrypoint: "src/api_dashboard/app.py",
           files: files,
           sharedWorker: false, // Disabilita SharedWorker per compatibilità mobile (Safari/iOS)

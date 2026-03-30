@@ -135,29 +135,45 @@ def view_profile():
     c1, c2, c3 = st.columns(3)
     with c1:
         st.markdown("### Dati Fisici & Accademici")
-        age = st.slider("Età", 18, 50, 22)
-        sleep = st.slider("Ore di Sonno medie/notte", 3.0, 14.0, 7.0)
-        study = st.number_input("Carico Studio Attuale (h/settimana)", 0, 80, 20)
-        gpa = st.slider("GPA Attuale (0-4)", 0.0, 4.0, 3.0)
+        age = st.number_input("Età", min_value=18, max_value=80, value=22, step=1)
+        sleep = st.number_input("Ore di Sonno medie/notte", min_value=3.0, max_value=14.0, value=7.0, step=0.5)
+        study = st.number_input("Carico Studio Attuale (h/settimana)", min_value=0, max_value=80, value=20, step=1)
+        gpa = st.number_input("GPA Attuale (0-4)", min_value=0.0, max_value=4.0, value=3.0, step=0.1)
     with c2:
         st.markdown("### Routine e Sfide")
-        social = st.slider("Social Media (h/giorno)", 0.0, 10.0, 2.0)
-        exercise = st.slider("Attività Fisica (h/settimana)", 0, 20, 3)
-        family_support = st.slider("Supporto Familiare (1-5)", 1, 5, 3)
-        financial_stress = st.slider("Stress Finanziario (1-5)", 1, 5, 3)
+        social = st.number_input("Social Media (h/giorno)", min_value=0.0, max_value=24.0, value=2.0, step=0.5)
+        exercise = st.number_input("Attività Fisica (h/settimana)", min_value=0, max_value=40, value=3, step=1)
+        family_support = st.number_input("Supporto Familiare (1-5)", min_value=1, max_value=5, value=3, step=1)
+        financial_stress = st.number_input("Stress Finanziario (1-5)", min_value=1, max_value=5, value=3, step=1)
     with c3:
         st.markdown("### Pressioni Psicologiche")
-        peer_pressure = st.slider("Pressione dei Pari (1-5)", 1, 5, 3)
-        relation_stress = st.slider("Stress Relazionale (1-5)", 1, 5, 2)
-        diet_quality = st.slider("Qualità Dieta (1-5)", 1, 5, 3)
+        peer_pressure = st.number_input("Pressione dei Pari (1-5)", min_value=1, max_value=5, value=3, step=1)
+        relation_stress = st.number_input("Stress Relazionale (1-5)", min_value=1, max_value=5, value=2, step=1)
+        diet_quality = st.number_input("Qualità Dieta (1-5)", min_value=1, max_value=5, value=3, step=1)
+
+    st.markdown("### Meccanismi di Coping 🌿")
+    coping_options = [
+        "Exercise", "Meditation", "Reading", "Social Media Engagement",
+        "Spending Time Alone", "Talking to Friends", "Travelling",
+        "Walking or Nature Walks", "Watching Sports", "Yoga"
+    ]
+    selected_coping = st.multiselect(
+        "Seleziona le attività che svolgi abitualmente per gestire lo stress:",
+        options=coping_options,
+        default=[]
+    )
 
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("💾 Trasmetti Dati al Machine Learning", use_container_width=True):
+        # Convertiamo la selezione multiselect in una dict {'Coping_Activity': 1/0}
+        coping_dict = {f"Coping_{opt}": (1 if opt in selected_coping else 0) for opt in coping_options}
+        
         st.session_state['user_profile'] = UserProfile(
             age=age, gpa=gpa, social_media_hours_per_day=social, sleep_hours_per_night=sleep,
             physical_exercise_hours_per_week=exercise, family_support=family_support,
             financial_stress=financial_stress, peer_pressure=peer_pressure,
-            relationship_stress=relation_stress, diet_quality=diet_quality, coping_mechanisms={}
+            relationship_stress=relation_stress, diet_quality=diet_quality, 
+            coping_mechanisms=coping_dict
         )
         st.session_state['profile_configured'] = True
         st.success("✅ Modello Aggiornato! Le features sono pronte per il Random Forest.")
@@ -354,12 +370,23 @@ def main():
                         box-shadow: none !important;
                         color: rgba(255,255,255,0.5);
                         font-size: 0.8rem;
-                        padding: 8px 4px;
+                        padding: 8px 2px;
                         border-radius: 14px;
                         transition: all 0.25s ease;
                         min-height: 0;
                         width: 100%;
                     `;
+                    // Forzo il div interno e il paragrafo a non spezzare la parola in verticale
+                    var txtTags = btn.querySelectorAll('p, div, span');
+                    txtTags.forEach(function(t) {
+                        t.style.wordBreak = 'keep-all';
+                        t.style.whiteSpace = 'nowrap';
+                        t.style.overflow = 'hidden';
+                        t.style.textOverflow = 'ellipsis';
+                        t.style.fontSize = '0.75rem';
+                        t.style.lineHeight = '1.1';
+                    });
+                    
                     // Detect if primary by checking the parent div's data-testid or the button kind
                     var parentDiv = btn.closest('[data-testid="baseButton-primary"]');
                     if (btn.getAttribute('kind') === 'primary' || parentDiv) {
