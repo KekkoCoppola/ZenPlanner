@@ -129,8 +129,8 @@ def login_page():
 
 
 def view_profile():
-    st.markdown("<h1>Profilo Utente & Parametri ML 🧬</h1>", unsafe_allow_html=True)
-    st.markdown("Configura le tue abitudini per calibrare l'Apprendimento Automatico e l'algoritmo di pianificazione.<br><br>", unsafe_allow_html=True)
+    st.markdown("<h1>Profilo Utente</h1>", unsafe_allow_html=True)
+    st.markdown("Configura le tue abitudini per calibrare personalizzare il tuo piano.<br><br>", unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns(3)
     with c1:
@@ -138,7 +138,7 @@ def view_profile():
         age = st.number_input("Età", min_value=18, max_value=80, value=22, step=1)
         sleep = st.number_input("Ore di Sonno medie/notte", min_value=3.0, max_value=14.0, value=7.0, step=0.5)
         study = st.number_input("Carico Studio Attuale (h/settimana)", min_value=0, max_value=80, value=20, step=1)
-        gpa = st.number_input("GPA Attuale (0-4)", min_value=0.0, max_value=4.0, value=3.0, step=0.1)
+        gpa = st.number_input("Come valuti il tuo rendimento accademico (0-4)", min_value=0.0, max_value=4.0, value=3.0, step=0.1)
     with c2:
         st.markdown("### Routine e Sfide")
         social = st.number_input("Social Media (h/giorno)", min_value=0.0, max_value=24.0, value=2.0, step=0.5)
@@ -147,15 +147,15 @@ def view_profile():
         financial_stress = st.number_input("Stress Finanziario (1-5)", min_value=1, max_value=5, value=3, step=1)
     with c3:
         st.markdown("### Pressioni Psicologiche")
-        peer_pressure = st.number_input("Pressione dei Pari (1-5)", min_value=1, max_value=5, value=3, step=1)
+        peer_pressure = st.number_input("Pressione Sociale (1-5)", min_value=1, max_value=5, value=3, step=1)
         relation_stress = st.number_input("Stress Relazionale (1-5)", min_value=1, max_value=5, value=2, step=1)
         diet_quality = st.number_input("Qualità Dieta (1-5)", min_value=1, max_value=5, value=3, step=1)
 
-    st.markdown("### Meccanismi di Coping 🌿")
+    st.markdown("### Cosa Fai Per Ridurre Lo Stress 🌿")
     coping_options = [
-        "Exercise", "Meditation", "Reading", "Social Media Engagement",
-        "Spending Time Alone", "Talking to Friends", "Travelling",
-        "Walking or Nature Walks", "Watching Sports", "Yoga"
+        "Esercizio", "Meditazione", "Lettura", "Social Media",
+        "Passare Il Tempo In Solitaria", "Parlare con gli amici", "Viaggiare",
+        "Passeggiare", "Guardare Sport", "Yoga"
     ]
     selected_coping = st.multiselect(
         "Seleziona le attività che svolgi abitualmente per gestire lo stress:",
@@ -164,7 +164,7 @@ def view_profile():
     )
 
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("💾 Trasmetti Dati al Machine Learning", use_container_width=True):
+    if st.button("💾 Salva Profilo", use_container_width=True):
         # Convertiamo la selezione multiselect in una dict {'Coping_Activity': 1/0}
         coping_dict = {f"Coping_{opt}": (1 if opt in selected_coping else 0) for opt in coping_options}
         
@@ -176,14 +176,14 @@ def view_profile():
             coping_mechanisms=coping_dict
         )
         st.session_state['profile_configured'] = True
-        st.success("✅ Modello Aggiornato! Le features sono pronte per il Random Forest.")
+        st.success("✅ Profilo Salvato!.")
 
 
 def view_scheduler():
-    st.markdown("<h1>Generatore Piano CSP 🚀</h1>", unsafe_allow_html=True)
+    st.markdown("<h1>Generatore Piano Settimanale 🚀</h1>", unsafe_allow_html=True)
 
     if not st.session_state['profile_configured']:
-        st.error("⚠️ Configura prima il tuo Profilo Utente per istruire l'Oracolo ML!")
+        st.error("⚠️ Configura prima il tuo Profilo Utente per la generazione del piano!")
         return
 
     user = st.session_state.get('user_profile')
@@ -191,7 +191,7 @@ def view_scheduler():
         st.error("Il tuo profilo è obsoleto. Torna in Profilo Utente e premi Salva!")
         return
 
-    st.markdown("### 📚 Inserimento Vincoli (Scope)")
+    st.markdown("### 📚 Inserimento Materie")
     c1, c2, c3, c4 = st.columns([3, 2, 2, 1])
     with c1: subj_name = st.text_input("Titolo Sessione / Materia")
     with c2: subj_hours = st.number_input("Ore necessarie", 1, 40, 5)
@@ -210,13 +210,13 @@ def view_scheduler():
             deadline_text = f"⏳ Entro {s['deadline']}" if s['deadline'] != 'Nessuna' else ''
             st.markdown(f"🔹 **{s['name']}** &mdash; {s['hours']}h <span style='color:#FF9F1C; font-size:0.85rem;'>{deadline_text}</span>", unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🗑️ Pulisci Coda C.S.P."):
+        if st.button("🗑️ Pulisci Lista Materie"):
             st.session_state['subjects_list'] = []
             st.rerun()
 
-    if st.button("✨ Avvia Risoluzione Neuro-Simbolica", use_container_width=True):
+    if st.button("✨ Avvia Generazione Piano Di Studio", use_container_width=True):
         if not st.session_state['subjects_list']:
-            st.warning("Nessuna variabile fornita al CSP!")
+            st.warning("Nessuna materia fornita !")
             return
 
         engine = ZenSchedulerEngine(user)
@@ -244,9 +244,9 @@ def view_scheduler():
                 day_name = days[slot.day_of_week]
                 plan[day_name][slot.start_time] = f"{slot.start_time:02d}:00 - {slot.start_time+1:02d}:00<br><b>{session.subject}</b>"
             st.session_state['study_plan'] = plan
-            st.success("✅ Orizzonti Pianificati! Naviga alla Dashboard per visualizzare l'output.")
+            st.success("✅ Piano Generato! Puoi Visualizzarlo Nella Dashboard.")
         else:
-            st.error("❌ Fallimento Backtracking. Riduci il carico o allenta le scadenze!")
+            st.error("❌ Fallimento . Riduci il carico o allenta le scadenze!")
             st.session_state['study_plan'] = {}
 
 
@@ -324,17 +324,17 @@ def main():
         c1, c2, c3 = st.columns(3)
         with c1:
             t = "primary" if page == "dashboard" else "secondary"
-            if st.button("🏠\nDashboard", key="go_dash", use_container_width=True, type=t):
+            if st.button("🏠 Dashboard", key="go_dash", use_container_width=True, type=t):
                 st.session_state['current_page'] = 'dashboard'
                 st.rerun()
         with c2:
             t = "primary" if page == "profile" else "secondary"
-            if st.button("👤\nProfilo", key="go_prof", use_container_width=True, type=t):
+            if st.button("👤 Profilo", key="go_prof", use_container_width=True, type=t):
                 st.session_state['current_page'] = 'profile'
                 st.rerun()
         with c3:
             t = "primary" if page == "scheduler" else "secondary"
-            if st.button("📅\nPlanner", key="go_sched", use_container_width=True, type=t):
+            if st.button("📅 Planner", key="go_sched", use_container_width=True, type=t):
                 st.session_state['current_page'] = 'scheduler'
                 st.rerun()
 
