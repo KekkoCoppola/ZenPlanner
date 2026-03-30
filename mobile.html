@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>ZenPlanner AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="ZenPlanner AI — Pianifica il tuo studio con l'intelligenza artificiale">
+  <link rel="icon" type="image/png" href="assets/ZenPlannerLogo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b132b;
+  --bg2: #141e3d;
+  --accent: #00b4d8;
+  --accent2: #7209b7;
+  --gold: #ff9f1c;
+  --text: #e2e8f0;
+  --muted: rgba(226,232,240,0.5);
+  --glass: rgba(25,25,45,0.65);
+  --glass-border: rgba(255,255,255,0.09);
+  --danger: #ff4757;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:radial-gradient(circle at 10% 20%,#1a1a2e 0%,#16213e 50%,#0f3460 100%);font-family:'Poppins',sans-serif;color:var(--text);}
+#app{display:none;width:100%;height:100%;flex-direction:column;}
+#app.visible{display:flex;}
+
+/* ── LOADING ── */
+#loading{position:fixed;inset:0;background:radial-gradient(circle at 10% 20%,#1a1a2e 0%,#16213e 50%,#0f3460 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .8s ease;}
+#loading.fade-out{opacity:0;pointer-events:none;}
+.ld-logo{filter:drop-shadow(0 0 20px rgba(0,229,255,.5));animation:pulse 2s infinite ease-in-out;}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.04);opacity:.8;}}
+.ld-title{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.6rem;letter-spacing:2px;color:#fff;margin:16px 0 6px;}
+.ld-sub{font-size:.78rem;color:var(--accent);opacity:.9;margin-bottom:24px;}
+.ld-bar-wrap{width:260px;height:5px;background:rgba(255,255,255,.1);border-radius:20px;overflow:hidden;}
+.ld-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:20px;transition:width .3s ease;}
+.ld-msg{font-size:.75rem;color:var(--accent);margin-top:10px;height:18px;text-align:center;}
+
+/* ── LOGIN ── */
+#login-screen{position:fixed;inset:0;background:radial-gradient(circle at 10% 20%,#1a1a2e 0%,#16213e 50%,#0f3460 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;z-index:900;}
+#login-screen.hidden{display:none;}
+.login-card{width:100%;max-width:360px;background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:24px;padding:32px 24px;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.4);}
+.login-card img{width:80px;margin-bottom:16px;filter:drop-shadow(0 0 12px rgba(0,229,255,.4));}
+.login-card h1{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.5rem;margin-bottom:4px;}
+.login-card p{color:var(--accent);font-size:.82rem;margin-bottom:24px;}
+
+/* ── PAGES ── */
+#pages{flex:1;overflow-y:auto;padding:16px 16px calc(80px + var(--safe-bottom));-webkit-overflow-scrolling:touch;}
+.page{display:none;animation:fadeUp .4s ease-out forwards;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+h2.page-title{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.4rem;margin-bottom:16px;color:#fff;}
+
+/* ── CARDS ── */
+.card{background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.25);}
+.card h3{font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;color:var(--accent);margin-bottom:12px;}
+
+/* ── FORM INPUTS ── */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;}
+.field input[type="text"],.field input[type="number"],.field select{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--glass-border);border-radius:10px;color:var(--text);font-family:'Poppins',sans-serif;font-size:.9rem;padding:10px 12px;outline:none;transition:border-color .2s;}
+.field input:focus,.field select:focus{border-color:var(--accent);}
+.field select option{background:#1a1a2e;}
+
+/* Coping grid */
+.coping-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.coping-btn{background:rgba(0,0,0,.3);border:1px solid var(--glass-border);border-radius:10px;color:var(--muted);font-family:'Poppins',sans-serif;font-size:.78rem;padding:9px 6px;cursor:pointer;transition:all .2s;text-align:center;}
+.coping-btn.selected{background:rgba(0,180,216,.18);border-color:var(--accent);color:var(--accent);}
+
+/* ── BUTTONS ── */
+.btn{width:100%;padding:13px;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:all .2s;letter-spacing:.5px;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 6px 20px rgba(0,180,216,.3);}
+.btn-primary:active{transform:scale(.97);}
+.btn-secondary{background:rgba(255,255,255,.07);border:1px solid var(--glass-border);color:var(--text);}
+.btn-add{background:rgba(0,180,216,.15);border:1px solid rgba(0,180,216,.3);color:var(--accent);border-radius:10px;padding:10px 16px;font-family:'Poppins',sans-serif;font-size:.85rem;cursor:pointer;}
+
+/* ── SUBJECTS LIST ── */
+.subj-item{display:flex;align-items:center;background:rgba(0,0,0,.2);border:1px solid var(--glass-border);border-radius:10px;padding:10px 12px;margin-bottom:8px;gap:8px;}
+.subj-item .subj-name{flex:1;font-size:.88rem;font-weight:600;}
+.subj-item .subj-hrs{color:var(--accent);font-size:.8rem;margin-right:6px;}
+.subj-item .subj-dead{color:var(--gold);font-size:.75rem;}
+.subj-del{background:none;border:none;color:var(--danger);font-size:1.1rem;cursor:pointer;padding:0 4px;}
+
+/* ── DASHBOARD METRICS ── */
+.metrics-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.metric-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:16px;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.2);}
+.metric-card .m-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.metric-card .m-value{font-family:'Outfit',sans-serif;font-weight:800;font-size:2rem;color:#fff;text-shadow:0 0 12px rgba(0,229,255,.3);}
+
+/* Stress gauge */
+.gauge-wrap{position:relative;width:120px;height:120px;margin:0 auto 6px;}
+.gauge-svg{transform:rotate(-90deg);}
+.gauge-bg{fill:none;stroke:rgba(255,255,255,.08);stroke-width:10;}
+.gauge-fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1s ease,stroke .5s ease;}
+.gauge-val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.gauge-val span:first-child{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.6rem;}
+.gauge-val span:last-child{font-size:.65rem;color:var(--muted);}
+
+/* Insight banner */
+.insight-banner{background:rgba(255,159,28,.12);border-left:3px solid var(--gold);border-radius:10px;padding:12px 14px;font-size:.82rem;line-height:1.5;margin-bottom:14px;color:#ffe0b2;}
+
+/* ── SCHEDULE ── */
+.schedule-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px;}
+.schedule-grid{display:grid;grid-template-columns:repeat(7,minmax(90px,1fr));gap:8px;min-width:650px;}
+.day-col{display:flex;flex-direction:column;gap:6px;}
+.day-hdr{font-family:'Outfit',sans-serif;font-weight:700;font-size:.8rem;color:var(--gold);text-align:center;padding:6px 4px;border-bottom:2px solid rgba(255,159,28,.25);margin-bottom:4px;}
+.slot-busy{background:linear-gradient(135deg,#4ea8de,#6930c3);color:#fff;border-radius:10px;padding:8px 6px;font-size:.72rem;font-weight:600;text-align:center;line-height:1.3;border:1px solid rgba(255,255,255,.2);animation:fadeUp .4s ease-out;}
+.slot-empty{background:rgba(0,0,0,.1);border:1px dashed rgba(255,255,255,.1);border-radius:10px;height:52px;}
+
+/* Day focus view */
+.day-focus-slot{background:linear-gradient(135deg,#4ea8de,#6930c3);color:#fff;border-radius:14px;padding:16px;margin-bottom:10px;font-size:.9rem;font-weight:600;text-align:center;box-shadow:0 6px 16px rgba(105,48,195,.35);}
+
+/* ── BOTTOM NAV ── */
+#bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);display:none;align-items:center;justify-content:space-around;width:100%;max-width:420px;background:rgba(12,18,40,.95);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.08);padding:8px 16px calc(8px + var(--safe-bottom));z-index:800;}
+#bottom-nav.visible{display:flex;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;padding:6px 0;font-size:.65rem;font-family:'Poppins',sans-serif;transition:color .2s;}
+.nav-btn .nav-icon{font-size:1.3rem;transition:transform .2s;}
+.nav-btn.active{color:var(--accent);}
+.nav-btn.active .nav-icon{transform:scale(1.15);}
+
+/* ── ALERTS ── */
+.alert{border-radius:10px;padding:12px 14px;font-size:.82rem;margin-bottom:12px;}
+.alert-warn{background:rgba(255,159,28,.15);border:1px solid rgba(255,159,28,.4);color:#ffe0b2;}
+.alert-err{background:rgba(255,71,87,.15);border:1px solid rgba(255,71,87,.4);color:#ffb3bb;}
+.alert-ok{background:rgba(0,200,120,.15);border:1px solid rgba(0,200,120,.4);color:#b3ffe0;}
+
+/* spinner */
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* toggle day select */
+.day-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;-webkit-overflow-scrolling:touch;}
+.day-tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid var(--glass-border);background:rgba(0,0,0,.2);color:var(--muted);font-size:.78rem;cursor:pointer;transition:all .2s;}
+.day-tab.active{background:rgba(0,180,216,.2);border-color:var(--accent);color:var(--accent);}
+
+/* desktop notice */
+.desktop-link{text-align:center;padding:10px;font-size:.75rem;color:var(--muted);margin-top:8px;}
+.desktop-link a{color:var(--accent);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <img src="assets/ZenPlannerLogo.png" class="ld-logo" width="90" alt="Logo">
+  <div class="ld-title">ZENPLANNER AI</div>
+  <div class="ld-sub">Versione Mobile</div>
+  <div class="ld-bar-wrap"><div class="ld-bar" id="ld-bar"></div></div>
+  <div class="ld-msg" id="ld-msg">Caricamento modello AI...</div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen" class="hidden">
+  <div class="login-card">
+    <img src="assets/ZenPlannerLogo.png" alt="Logo">
+    <h1>ZenPlanner AI</h1>
+    <p>Intelligenza Artificiale per il tuo Benessere Accademico</p>
+    <div class="field">
+      <label>Il tuo Nome</label>
+      <input type="text" id="login-name" placeholder="Inserisci il tuo nome" autocomplete="given-name">
+    </div>
+    <button class="btn btn-primary" id="login-btn">Accedi al Sistema →</button>
+    <div class="desktop-link"><a href="index.html?force=desktop">🖥 Versione Desktop (completa)</a></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div id="pages">
+
+    <!-- PAGE: DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <h2 class="page-title">📊 Analytics</h2>
+      <div id="dash-empty" class="alert alert-warn">
+        ⚠️ Genera prima un piano dallo <strong>Scheduler</strong> per vedere i risultati.
+      </div>
+      <div id="dash-content" style="display:none;">
+        <div class="metrics-row">
+          <div class="metric-card">
+            <div class="m-label">Stress Burnout</div>
+            <div class="gauge-wrap">
+              <svg class="gauge-svg" width="120" height="120" viewBox="0 0 120 120">
+                <circle class="gauge-bg" cx="60" cy="60" r="50"/>
+                <circle class="gauge-fill" id="gauge-circle" cx="60" cy="60" r="50"
+                  stroke-dasharray="314" stroke-dashoffset="314" stroke="var(--accent)"/>
+              </svg>
+              <div class="gauge-val">
+                <span id="dash-stress">—</span>
+                <span>/ 10</span>
+              </div>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="m-label">Blocchi (1h) Allocati</div>
+            <div class="m-value" id="dash-blocks">—</div>
+          </div>
+        </div>
+        <div id="dash-insight" class="insight-banner" style="display:none;"></div>
+
+        <!-- Day selector tabs -->
+        <div id="day-tabs" class="day-tabs"></div>
+        <div id="day-slots-container"></div>
+      </div>
+    </div>
+
+    <!-- PAGE: PROFILO -->
+    <div class="page" id="page-profilo">
+      <h2 class="page-title">👤 Profilo Utente</h2>
+      <div class="card">
+        <h3>🎓 Dati Accademici & Fisici</h3>
+        <div class="field"><label>Età</label><input type="number" id="p-age" value="22" min="18" max="80"></div>
+        <div class="field"><label>GPA — Rendimento Accademico (0–4)</label><input type="number" id="p-gpa" value="3.0" min="0" max="4" step="0.1"></div>
+        <div class="field"><label>Ore di Sonno / notte</label><input type="number" id="p-sleep" value="7" min="3" max="14" step="0.5"></div>
+        <div class="field"><label>Attività Fisica (h/settimana)</label><input type="number" id="p-exercise" value="3" min="0" max="40"></div>
+      </div>
+      <div class="card">
+        <h3>📱 Routine Quotidiana</h3>
+        <div class="field"><label>Social Media (h/giorno)</label><input type="number" id="p-social" value="2" min="0" max="24" step="0.5"></div>
+        <div class="field"><label>Supporto Familiare (1–5)</label><input type="number" id="p-family" value="3" min="1" max="5"></div>
+        <div class="field"><label>Stress Finanziario (1–5)</label><input type="number" id="p-financial" value="3" min="1" max="5"></div>
+      </div>
+      <div class="card">
+        <h3>🧠 Pressioni Psicologiche</h3>
+        <div class="field"><label>Pressione Sociale (1–5)</label><input type="number" id="p-peer" value="3" min="1" max="5"></div>
+        <div class="field"><label>Stress Relazionale (1–5)</label><input type="number" id="p-relation" value="2" min="1" max="5"></div>
+        <div class="field"><label>Qualità Dieta (1–5)</label><input type="number" id="p-diet" value="3" min="1" max="5"></div>
+      </div>
+      <div class="card">
+        <h3>🌿 Come Gestisci Lo Stress?</h3>
+        <div class="coping-grid" id="coping-grid"></div>
+      </div>
+      <button class="btn btn-primary" id="save-profile-btn">💾 Salva Profilo</button>
+      <div id="profile-msg" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- PAGE: SCHEDULER -->
+    <div class="page" id="page-scheduler">
+      <h2 class="page-title">📅 Planner</h2>
+      <div id="sched-no-profile" class="alert alert-warn" style="display:none;">
+        ⚠️ Configura prima il tuo <strong>Profilo</strong> e premi Salva!
+      </div>
+      <div class="card">
+        <h3>📚 Aggiungi Materia</h3>
+        <div class="field"><label>Titolo / Materia</label><input type="text" id="s-name" placeholder="Es. Analisi I"></div>
+        <div class="field"><label>Ore Necessarie</label><input type="number" id="s-hours" value="5" min="1" max="40"></div>
+        <div class="field">
+          <label>Scadenza</label>
+          <select id="s-deadline">
+            <option value="">Nessuna</option>
+            <option value="0">Lunedì</option><option value="1">Martedì</option>
+            <option value="2">Mercoledì</option><option value="3">Giovedì</option>
+            <option value="4">Venerdì</option><option value="5">Sabato</option>
+            <option value="6">Domenica</option>
+          </select>
+        </div>
+        <button class="btn-add" id="add-subj-btn">➕ Aggiungi Materia</button>
+      </div>
+
+      <div id="subj-list-wrap" style="display:none;">
+        <div class="card">
+          <h3>📋 Coda di Elaborazione</h3>
+          <div id="subj-list"></div>
+          <button class="btn btn-secondary" id="clear-subj-btn" style="margin-top:8px;">🗑 Pulisci Lista</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="gen-btn">✨ Genera Piano di Studio</button>
+      <div id="sched-msg" style="margin-top:12px;"></div>
+    </div>
+
+  </div><!-- /pages -->
+
+  <!-- BOTTOM NAV -->
+  <nav id="bottom-nav" class="visible">
+    <button class="nav-btn active" data-page="dashboard" id="nav-dashboard">
+      <span class="nav-icon">🏠</span><span>Dashboard</span>
+    </button>
+    <button class="nav-btn" data-page="profilo" id="nav-profilo">
+      <span class="nav-icon">👤</span><span>Profilo</span>
+    </button>
+    <button class="nav-btn" data-page="scheduler" id="nav-scheduler">
+      <span class="nav-icon">📅</span><span>Planner</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════
+// APP STATE
+// ═══════════════════════════════════════════════════════════
+const State = {
+  loggedIn: false,
+  userName: '',
+  profileSaved: false,
+  profile: null,   // UserProfile object
+  subjects: [],    // [{name, hours, deadline}]
+  plan: null,      // {day: [{hour, subject}]}
+  stressScore: null,
+  insightMsg: '',
+  ML: null         // {model, scaler} loaded JSON
+};
+
+const DAYS = ['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica'];
+const DAYS_SHORT = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+
+const COPING_OPTIONS = [
+  {key:'Coping_Exercise',          label:'Esercizio'},
+  {key:'Coping_Meditation',        label:'Meditazione'},
+  {key:'Coping_Reading',           label:'Lettura'},
+  {key:'Coping_Social Media Engagement', label:'Social Media'},
+  {key:'Coping_Spending Time Alone',label:'Solitudine'},
+  {key:'Coping_Talking to Friends',label:'Amici'},
+  {key:'Coping_Travelling',        label:'Viaggiare'},
+  {key:'Coping_Walking or Nature Walks',label:'Passeggiare'},
+  {key:'Coping_Watching Sports',   label:'Sport'},
+  {key:'Coping_Yoga',              label:'Yoga'}
+];
+
+// ═══════════════════════════════════════════════════════════
+// LOADING
+// ═══════════════════════════════════════════════════════════
+function setProgress(pct, msg) {
+  document.getElementById('ld-bar').style.width = pct + '%';
+  if (msg) document.getElementById('ld-msg').textContent = msg;
+}
+
+async function loadML() {
+  setProgress(10, 'Caricamento modello AI...');
+  const base = (() => {
+    const loc = window.location;
+    const p = loc.pathname.replace(/\/mobile\.html$/, '');
+    return loc.protocol + '//' + loc.host + p;
+  })();
+
+  const [modelRes, scalerRes] = await Promise.all([
+    fetch(base + '/assets/model.json'),
+    fetch(base + '/assets/scaler.json')
+  ]);
+  setProgress(60, 'Parsing modello (200 alberi)...');
+  const [model, scaler] = await Promise.all([modelRes.json(), scalerRes.json()]);
+  setProgress(90, 'Inizializzazione completata!');
+  State.ML = { model, scaler };
+}
+
+// ═══════════════════════════════════════════════════════════
+// ML INFERENCE — Random Forest + StandardScaler
+// ═══════════════════════════════════════════════════════════
+function traverseTree(node, features) {
+  if ('leaf' in node) return node.leaf;
+  return features[node.feature] <= node.threshold
+    ? traverseTree(node.left, features)
+    : traverseTree(node.right, features);
+}
+
+function predictStress(profile, totalStudyHours) {
+  const { model, scaler } = State.ML;
+  const sleep = profile.sleep;
+  const exercise = profile.exercise;
+  const social = profile.social;
+
+  const workRest = totalStudyHours / Math.max(sleep * 7, 1);
+  const socialEx = (social * 7) / (exercise + 0.1);
+
+  // Build raw numerical map
+  const raw = {
+    'Age': profile.age,
+    'Academic Performance (GPA)': profile.gpa,
+    'Study Hours Per Week': totalStudyHours,
+    'Social Media Usage (Hours per day)': social,
+    'Sleep Duration (Hours per night)': sleep,
+    'Physical Exercise (Hours per week)': exercise,
+    'Family Support': profile.family,
+    'Financial Stress': profile.financial,
+    'Peer Pressure': profile.peer,
+    'Relationship Stress': profile.relation,
+    'Diet Quality': profile.diet,
+    'Work_Rest_Ratio': workRest,
+    'Social_Exercise_Ratio': socialEx
+  };
+
+  // Apply StandardScaler
+  const scaled = {};
+  scaler.feature_names.forEach((name, i) => {
+    scaled[name] = (raw[name] - scaler.mean[i]) / scaler.scale[i];
+  });
+
+  // Merge binary coping features (not scaled)
+  const features = Object.assign({}, scaled, profile.coping);
+
+  // Average prediction of all trees
+  let sum = 0;
+  for (const tree of model.trees) sum += traverseTree(tree, features);
+  return Math.min(10, Math.max(1, sum / model.trees.length));
+}
+
+// ═══════════════════════════════════════════════════════════
+// CSP SCHEDULER (porting from Python)
+// ═══════════════════════════════════════════════════════════
+function makeSlots() {
+  const slots = [];
+  for (let d = 0; d < 7; d++)
+    for (let h = 9; h < 18; h++)
+      slots.push({ day: d, hour: h });
+  return slots;
+}
+
+function slotKey(s) { return s.day * 100 + s.hour; }
+
+// Constraints (return true = satisfied)
+function checkNoOverlap(assignment) {
+  const used = new Set();
+  for (const k of Object.keys(assignment)) {
+    const s = assignment[k];
+    const key = slotKey(s);
+    if (used.has(key)) return false;
+    used.add(key);
+  }
+  return true;
+}
+
+function checkDailyMax(assignment, maxHours) {
+  const dayCounts = {};
+  for (const k of Object.keys(assignment)) {
+    const d = assignment[k].day;
+    dayCounts[d] = (dayCounts[d] || 0) + 1;
+    if (dayCounts[d] > maxHours) return false;
+  }
+  return true;
+}
+
+function checkMaxConsecutive(assignment, maxConsec) {
+  const dayHours = {};
+  for (const k of Object.keys(assignment)) {
+    const { day, hour } = assignment[k];
+    if (!dayHours[day]) dayHours[day] = [];
+    dayHours[day].push(hour);
+  }
+  for (const hours of Object.values(dayHours)) {
+    const sorted = hours.slice().sort((a, b) => a - b);
+    let consec = 1;
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i] - sorted[i-1] === 1) {
+        consec++;
+        if (consec > maxConsec) return false;
+      } else consec = 1;
+    }
+  }
+  return true;
+}
+
+function checkDeadline(assignment, sessionId, deadlineDay) {
+  if (!(sessionId in assignment)) return true;
+  return assignment[sessionId].day <= deadlineDay;
+}
+
+function isConsistent(sessionId, assignment, sessions, maxDaily, maxConsec) {
+  if (!checkNoOverlap(assignment)) return false;
+  if (!checkDailyMax(assignment, maxDaily)) return false;
+  if (!checkMaxConsecutive(assignment, maxConsec)) return false;
+  const sess = sessions.find(s => s.id === sessionId);
+  if (sess && sess.deadline !== null) {
+    if (!checkDeadline(assignment, sessionId, sess.deadline)) return false;
+  }
+  return true;
+}
+
+function countConsistentValues(sessId, assignment, domain, sessions, maxDaily, maxConsec) {
+  let count = 0;
+  for (const slot of domain) {
+    const test = Object.assign({}, assignment, { [sessId]: slot });
+    if (isConsistent(sessId, test, sessions, maxDaily, maxConsec)) count++;
+  }
+  return count;
+}
+
+function runCSP(sessions, maxDaily, maxConsec, timeoutMs = 5000) {
+  const allSlots = makeSlots();
+  const unassigned = sessions.map(s => s.id);
+  const start = Date.now();
+  let timedOut = false;
+
+  function backtrack(assignment, remaining) {
+    if (Date.now() - start > timeoutMs) { timedOut = true; return null; }
+    if (remaining.length === 0) return assignment;
+
+    // MRV: pick session with fewest consistent values
+    let best = null, bestCount = Infinity;
+    for (const sid of remaining) {
+      const c = countConsistentValues(sid, assignment, allSlots, sessions, maxDaily, maxConsec);
+      if (c < bestCount) { bestCount = c; best = sid; }
+    }
+    const chosen = best;
+
+    // LCV: order slots by least loaded day
+    const dayLoad = {};
+    for (const v of Object.values(assignment)) dayLoad[v.day] = (dayLoad[v.day] || 0) + 1;
+    const orderedSlots = allSlots.slice().sort((a, b) => {
+      const la = dayLoad[a.day] || 0, lb = dayLoad[b.day] || 0;
+      return la !== lb ? la - lb : a.hour - b.hour;
+    });
+
+    const nextRemaining = remaining.filter(s => s !== chosen);
+    for (const slot of orderedSlots) {
+      if (timedOut) return null;
+      const testAssign = Object.assign({}, assignment, { [chosen]: slot });
+      if (isConsistent(chosen, testAssign, sessions, maxDaily, maxConsec)) {
+        const result = backtrack(testAssign, nextRemaining);
+        if (result !== null) return result;
+      }
+    }
+    return null;
+  }
+
+  const result = backtrack({}, unassigned);
+  return { result, timedOut };
+}
+
+// Greedy fallback: assign by going day by day, hour by hour
+function greedyFallback(sessions, maxDaily) {
+  const used = new Set();
+  const assignment = {};
+  const dayCount = {};
+
+  const sorted = sessions.slice().sort((a, b) => {
+    const da = a.deadline !== null ? a.deadline : 99;
+    const db = b.deadline !== null ? b.deadline : 99;
+    return da - db;
+  });
+
+  for (const sess of sorted) {
+    let placed = false;
+    const maxDay = sess.deadline !== null ? sess.deadline : 6;
+    for (let d = 0; d <= maxDay && !placed; d++) {
+      if ((dayCount[d] || 0) >= maxDaily) continue;
+      for (let h = 9; h < 18 && !placed; h++) {
+        const key = d * 100 + h;
+        if (!used.has(key)) {
+          used.add(key);
+          assignment[sess.id] = { day: d, hour: h };
+          dayCount[d] = (dayCount[d] || 0) + 1;
+          placed = true;
+        }
+      }
+    }
+    if (!placed) {
+      // relax deadline
+      for (let d = 0; d <= 6 && !placed; d++) {
+        for (let h = 9; h < 18 && !placed; h++) {
+          const key = d * 100 + h;
+          if (!used.has(key)) {
+            used.add(key);
+            assignment[sess.id] = { day: d, hour: h };
+            dayCount[d] = (dayCount[d] || 0) + 1;
+            placed = true;
+          }
+        }
+      }
+    }
+  }
+  return assignment;
+}
+
+function generateSchedule(profile, subjects) {
+  const totalHours = subjects.reduce((s, x) => s + x.hours, 0);
+  const stress = predictStress(profile, totalHours);
+
+  let maxDaily = 8;
+  let maxConsec = 2;
+  let insightMsg = `Volume richiesto: ${totalHours} sessioni. Stress ML predetto: ${stress.toFixed(1)}/10. `;
+
+  if (stress > 6.0) {
+    maxDaily = Math.max(2, maxDaily - 2);
+    maxConsec = 1;
+    insightMsg += `⚡ ALLARME Burnout. L'Oracolo ML forza tetto a ${maxDaily}h/giorno e blocchi da ${maxConsec}h per imporre il riposo.`;
+  } else {
+    insightMsg += `✅ Carico sano. Distribuzione adattiva attivata (max ${maxConsec}h consecutive senza pause).`;
+  }
+
+  // Flatten subjects to sessions
+  const sessions = [];
+  for (const subj of subjects) {
+    const deadline = subj.deadline !== '' ? parseInt(subj.deadline) : null;
+    for (let i = 0; i < subj.hours; i++) {
+      sessions.push({ id: `${subj.name}_${i}`, subject: subj.name, deadline });
+    }
+  }
+
+  // Run CSP (3 second timeout on mobile)
+  const { result, timedOut } = runCSP(sessions, maxDaily, maxConsec, 3000);
+  let assignment = result;
+  let usedFallback = false;
+
+  if (!assignment || timedOut) {
+    assignment = greedyFallback(sessions, maxDaily);
+    usedFallback = true;
+    if (timedOut) insightMsg += ' ⚠️ Timeout CSP: piano generato con algoritmo greedy ottimizzato.';
+  }
+
+  // Build plan: {dayIndex: [{hour, subject}]}
+  const plan = {};
+  for (let d = 0; d < 7; d++) plan[d] = [];
+
+  for (const sess of sessions) {
+    const slot = assignment[sess.id];
+    if (slot) plan[slot.day].push({ hour: slot.hour, subject: sess.subject });
+  }
+  for (let d = 0; d < 7; d++) plan[d].sort((a, b) => a.hour - b.hour);
+
+  return { plan, stress, insightMsg, usedFallback };
+}
+
+// ═══════════════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  document.getElementById('pages').scrollTop = 0;
+}
+
+function showMsg(elId, type, text) {
+  const el = document.getElementById(elId);
+  el.innerHTML = `<div class="alert alert-${type}">${text}</div>`;
+}
+
+function renderSubjectList() {
+  const wrap = document.getElementById('subj-list-wrap');
+  const list = document.getElementById('subj-list');
+  if (State.subjects.length === 0) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  list.innerHTML = State.subjects.map((s, i) => {
+    const dead = s.deadline !== '' ? ` ⏳ Entro ${DAYS[parseInt(s.deadline)]}` : '';
+    return `<div class="subj-item">
+      <span class="subj-name">${s.name}</span>
+      <span class="subj-hrs">${s.hours}h</span>
+      <span class="subj-dead">${dead}</span>
+      <button class="subj-del" onclick="removeSubject(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+window.removeSubject = function(i) {
+  State.subjects.splice(i, 1);
+  renderSubjectList();
+};
+
+function renderDashboard() {
+  const empty = document.getElementById('dash-empty');
+  const content = document.getElementById('dash-content');
+
+  if (!State.plan) { empty.style.display = ''; content.style.display = 'none'; return; }
+  empty.style.display = 'none';
+  content.style.display = 'block';
+
+  // Stress gauge
+  const stress = State.stressScore;
+  document.getElementById('dash-stress').textContent = stress ? stress.toFixed(1) : '—';
+  const circle = document.getElementById('gauge-circle');
+  const pct = stress ? (stress - 1) / 9 : 0;
+  const circumference = 314;
+  circle.style.strokeDashoffset = circumference - pct * circumference;
+  const color = stress > 7 ? '#ff4757' : stress > 5 ? '#ff9f1c' : '#00e5ff';
+  circle.style.stroke = color;
+
+  // Blocks
+  let totalBlocks = 0;
+  for (const d of Object.values(State.plan)) totalBlocks += d.length;
+  document.getElementById('dash-blocks').textContent = totalBlocks;
+
+  // Insight
+  const ib = document.getElementById('dash-insight');
+  if (State.insightMsg) {
+    ib.style.display = '';
+    ib.textContent = '🧠 ML: ' + State.insightMsg;
+  }
+
+  // Day tabs
+  const tabs = document.getElementById('day-tabs');
+  tabs.innerHTML = DAYS.map((d, i) => {
+    const hasSessions = State.plan[i] && State.plan[i].length > 0;
+    return `<div class="day-tab ${i === 0 ? 'active' : ''}" onclick="selectDay(${i})">${DAYS_SHORT[i]}${hasSessions ? ' •' : ''}</div>`;
+  }).join('');
+  renderDaySlots(0);
+}
+
+window.selectDay = function(dayIdx) {
+  document.querySelectorAll('.day-tab').forEach((t, i) => t.classList.toggle('active', i === dayIdx));
+  renderDaySlots(dayIdx);
+};
+
+function renderDaySlots(dayIdx) {
+  const container = document.getElementById('day-slots-container');
+  const slots = State.plan[dayIdx] || [];
+  if (slots.length === 0) {
+    container.innerHTML = `<div style="text-align:center;padding:32px;opacity:.5;font-size:.9rem;">🌿 Zen mode — nessuna sessione</div>`;
+    return;
+  }
+  container.innerHTML = slots.map(s =>
+    `<div class="day-focus-slot">
+      <div style="font-size:.75rem;opacity:.7;margin-bottom:4px;">${s.hour}:00 – ${s.hour+1}:00</div>
+      <div>${s.subject}</div>
+    </div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// COPING BUTTONS
+// ═══════════════════════════════════════════════════════════
+function initCopingGrid() {
+  const grid = document.getElementById('coping-grid');
+  grid.innerHTML = COPING_OPTIONS.map((o, i) =>
+    `<button class="coping-btn" data-key="${o.key}" onclick="toggleCoping(this)">${o.label}</button>`
+  ).join('');
+}
+
+window.toggleCoping = function(btn) {
+  btn.classList.toggle('selected');
+};
+
+function getSelectedCoping() {
+  const result = {};
+  COPING_OPTIONS.forEach(o => result[o.key] = 0);
+  document.querySelectorAll('.coping-btn.selected').forEach(btn => {
+    result[btn.dataset.key] = 1;
+  });
+  return result;
+}
+
+// ═══════════════════════════════════════════════════════════
+// PROFILE SAVE
+// ═══════════════════════════════════════════════════════════
+function saveProfile() {
+  const get = id => parseFloat(document.getElementById(id).value) || 0;
+  State.profile = {
+    age: get('p-age'), gpa: get('p-gpa'), sleep: get('p-sleep'),
+    exercise: get('p-exercise'), social: get('p-social'),
+    family: get('p-family'), financial: get('p-financial'),
+    peer: get('p-peer'), relation: get('p-relation'), diet: get('p-diet'),
+    coping: getSelectedCoping()
+  };
+  State.profileSaved = true;
+  showMsg('profile-msg', 'ok', '✅ Profilo salvato! Vai al Planner per generare il tuo piano.');
+}
+
+// ═══════════════════════════════════════════════════════════
+// SCHEDULER
+// ═══════════════════════════════════════════════════════════
+function addSubject() {
+  const name = document.getElementById('s-name').value.trim();
+  const hours = parseInt(document.getElementById('s-hours').value) || 1;
+  const deadline = document.getElementById('s-deadline').value;
+  if (!name) { showMsg('sched-msg', 'warn', '⚠️ Inserisci un nome per la materia.'); return; }
+  State.subjects.push({ name, hours, deadline });
+  document.getElementById('s-name').value = '';
+  renderSubjectList();
+  document.getElementById('sched-msg').innerHTML = '';
+}
+
+function generatePlan() {
+  if (!State.profileSaved) {
+    document.getElementById('sched-no-profile').style.display = '';
+    return;
+  }
+  if (State.subjects.length === 0) {
+    showMsg('sched-msg', 'warn', '⚠️ Aggiungi almeno una materia!');
+    return;
+  }
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Engine CSP in esecuzione...';
+  document.getElementById('sched-msg').innerHTML = '';
+
+  // Run async so UI updates first
+  setTimeout(() => {
+    try {
+      const { plan, stress, insightMsg } = generateSchedule(State.profile, State.subjects);
+      State.plan = plan;
+      State.stressScore = stress;
+      State.insightMsg = insightMsg;
+      renderDashboard();
+      showPage('dashboard');
+    } catch (e) {
+      showMsg('sched-msg', 'err', '❌ Errore durante la generazione: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '✨ Genera Piano di Studio';
+    }
+  }, 50);
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => showPage(btn.dataset.page));
+});
+
+// ═══════════════════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════════════════
+function setupLogin() {
+  const loginScreen = document.getElementById('login-screen');
+  loginScreen.classList.remove('hidden');
+
+  document.getElementById('login-btn').addEventListener('click', doLogin);
+  document.getElementById('login-name').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  function doLogin() {
+    const name = document.getElementById('login-name').value.trim();
+    if (!name) return;
+    State.loggedIn = true;
+    State.userName = name;
+    loginScreen.classList.add('hidden');
+    document.getElementById('app').classList.add('visible');
+    document.getElementById('bottom-nav').classList.add('visible');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// BUTTONS WIRING
+// ═══════════════════════════════════════════════════════════
+document.getElementById('save-profile-btn').addEventListener('click', saveProfile);
+document.getElementById('add-subj-btn').addEventListener('click', addSubject);
+document.getElementById('gen-btn').addEventListener('click', generatePlan);
+document.getElementById('clear-subj-btn').addEventListener('click', () => {
+  State.subjects = [];
+  renderSubjectList();
+});
+
+// ═══════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════
+async function boot() {
+  initCopingGrid();
+  try {
+    await loadML();
+    setProgress(100, '✅ Pronto!');
+    await new Promise(r => setTimeout(r, 600));
+  } catch (e) {
+    setProgress(100, '⚠️ Errore caricamento modello. Funzionalità limitate.');
+    await new Promise(r => setTimeout(r, 1500));
+  }
+  const loading = document.getElementById('loading');
+  loading.classList.add('fade-out');
+  setTimeout(() => { loading.style.display = 'none'; setupLogin(); }, 850);
+}
+
+boot();
+</script>
+</body>
+</html>
