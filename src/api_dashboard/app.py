@@ -29,9 +29,9 @@ h1, h2, h3, h4 { font-family: 'Outfit', sans-serif !important; font-weight: 800 
     min-height: 100vh;
 }
 
-/* Scroll padding for navbar */
+/* ── LAYOUT ── */
 .block-container {
-    padding: 2rem 3rem 110px 3rem !important;
+    padding: 90px 3rem 4rem 3rem !important; /* Top padding for fixed navbar */
     max-width: 1400px !important;
 }
 
@@ -174,150 +174,25 @@ h1, h2, h3, h4 { font-family: 'Outfit', sans-serif !important; font-weight: 800 
     border-radius: 10px !important;
     color: #E2E8F0 !important;
     font-family: 'Poppins', sans-serif !important;
-    transition: border-color 0.2s, box-shadow 0.2s !important;
-}
-[data-testid="stNumberInput"] > div > div > input:focus,
-[data-testid="stTextInput"] > div > div > input:focus {
-    border-color: #00B4D8 !important;
-    box-shadow: 0 0 0 3px rgba(0,180,216,0.18) !important;
-    outline: none !important;
-}
-[data-testid="stNumberInput"] button {
-    background: rgba(0,180,216,0.12) !important;
-    border: 1px solid rgba(0,180,216,0.25) !important;
-    color: #00B4D8 !important;
-    border-radius: 8px !important;
-    transition: background 0.2s !important;
-}
-[data-testid="stNumberInput"] button:hover { background: rgba(0,180,216,0.28) !important; }
-
-[data-testid="stSelectbox"] > div > div {
-    background: rgba(0,0,0,0.35) !important;
-    border: 1px solid rgba(255,255,255,0.12) !important;
-    border-radius: 10px !important;
-    color: #E2E8F0 !important;
-}
-[data-testid="stMultiSelect"] > div > div {
-    background: rgba(0,0,0,0.35) !important;
-    border: 1px solid rgba(255,255,255,0.12) !important;
-    border-radius: 10px !important;
 }
 
-/* ── BUTTONS ── */
-.stButton > button {
-    background: rgba(14, 22, 52, 0.75) !important;
-    backdrop-filter: blur(8px) !important;
-    color: #C8D6E5 !important;
-    border: 1px solid rgba(255,255,255,0.14) !important;
-    border-radius: 12px !important;
-    font-family: 'Outfit', sans-serif !important;
-    font-weight: 600 !important;
+/* ── DESKTOP NAVBAR FIX STYLES ── */
+.desktop-nav-container {
+    pointer-events: none; /* Let clicks through unless on a button */
+}
+
+/* Ensure no "..." in nav buttons */
+[data-testid="stHorizontalBlock"] button p {
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
     font-size: 0.9rem !important;
-    padding: 0.55rem 1.8rem !important;
-    transition: all 0.25s ease !important;
-    letter-spacing: 0.3px !important;
-}
-.stButton > button:hover {
-    transform: translateY(-2px) !important;
-    background: rgba(114,9,183,0.55) !important;
-    border-color: #00B4D8 !important;
-    box-shadow: 0 6px 18px rgba(114,9,183,0.4) !important;
-    color: #fff !important;
-}
-.stButton > button[kind="primary"] {
-    background: linear-gradient(135deg, rgba(0,180,216,0.7), rgba(114,9,183,0.7)) !important;
-    border-color: rgba(0,180,216,0.5) !important;
-    color: #fff !important;
-}
-.stButton > button[kind="primary"]:hover {
-    background: linear-gradient(135deg, rgba(0,180,216,0.9), rgba(114,9,183,0.9)) !important;
-    box-shadow: 0 8px 24px rgba(0,180,216,0.35) !important;
-}
-
-/* ── INSIGHT BANNER ── */
-.insight-block {
-    background: rgba(255,159,28,0.12);
-    border-left: 4px solid #FF9F1C;
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 24px;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    color: #ffe0b2;
-    animation: fadeUp 0.5s ease-out;
-}
-
-/* ── SECTION DIVIDER ── */
-.section-label {
-    font-family: 'Outfit', sans-serif;
-    font-weight: 700;
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: rgba(255,255,255,0.4);
-    margin: 24px 0 10px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-
-/* ── PAGE HEADER ── */
-.page-header {
-    margin-bottom: 28px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-.page-header h1 {
-    font-size: 2rem !important;
-    margin-bottom: 4px !important;
-    background: linear-gradient(135deg, #fff 0%, #a8d8ea 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-.page-header p { color: rgba(255,255,255,0.5); font-size: 0.9rem; margin: 0; }
-
-/* ── SUBJECT QUEUE ITEM ── */
-.subj-item {
-    display: flex; align-items: center; gap: 12px;
-    background: rgba(0,0,0,0.25);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 12px;
-    padding: 12px 16px;
-    margin-bottom: 8px;
-    transition: border-color 0.2s;
-}
-.subj-item:hover { border-color: rgba(0,180,216,0.3); }
-.subj-dot { width: 8px; height: 8px; border-radius: 50%; background: #00E5FF; flex-shrink: 0; box-shadow: 0 0 6px rgba(0,229,255,0.6); }
-.subj-name { flex: 1; font-weight: 600; font-size: 0.92rem; }
-.subj-hours { color: #00B4D8; font-weight: 700; font-size: 0.85rem; }
-.subj-dead { color: #FF9F1C; font-size: 0.78rem; }
-
-/* ── NAVBAR (hidden — replaced by top bar via JS) ── */
-.nav-marker { display: none !important; }
-
-/* ── RADIO ── */
-[data-testid="stRadio"] > div { gap: 8px !important; }
-[data-testid="stRadio"] label {
-    background: rgba(0,0,0,0.25) !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
-    border-radius: 10px !important;
-    padding: 6px 18px !important;
-    transition: all 0.2s !important;
-}
-[data-testid="stRadio"] label:hover { border-color: rgba(0,180,216,0.4) !important; }
-
-/* ── INFO/SUCCESS/ERROR ── */
-[data-testid="stAlert"] {
-    border-radius: 12px !important;
-    border: none !important;
-    font-size: 0.88rem !important;
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
 ::-webkit-scrollbar-thumb { background: rgba(0,180,216,0.3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(0,180,216,0.5); }
 </style>
 """, unsafe_allow_html=True)
 
@@ -327,7 +202,7 @@ logo_path = os.path.join(base_dir, "assets", "ZenPlannerLogo.png")
 for key, default in [
     ('logged_in', False), ('user_name', ''), ('stress_level', None),
     ('study_plan', {}), ('profile_configured', False), ('user_profile', None),
-    ('engine_msg', ''), ('subjects_list', [])
+    ('engine_msg', ''), ('subjects_list', []), ('current_page', 'dashboard')
 ]:
     if key not in st.session_state:
         st.session_state[key] = default
@@ -504,7 +379,6 @@ def view_dashboard():
     stress = st.session_state.get('stress_level')
 
     if stress is None:
-        # Empty state — guide the user
         st.markdown("""
         <div style='text-align:center; padding:60px 20px; opacity:0.6;'>
           <div style='font-size:3rem; margin-bottom:16px;'>🧘</div>
@@ -545,39 +419,131 @@ def view_dashboard():
         st.markdown(f"<div class='insight-block'>🧠 <strong>Insight ML:</strong> {engine_msg}</div>", unsafe_allow_html=True)
 
     plan = st.session_state.get('study_plan', {})
-    if not plan:
-        st.info("Piano non ancora generato.")
-        return
+    if plan:
+        view_type = st.radio("Vista calendario", ["Visualizzazione Settimanale", "Focus Giornaliero"], horizontal=True)
+        st.markdown("<br>", unsafe_allow_html=True)
 
-    view_type = st.radio("Vista calendario", ["Visualizzazione Settimanale", "Focus Giornaliero"], horizontal=True)
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    if view_type == "Visualizzazione Settimanale":
-        cols = st.columns(7)
-        for idx, (day, day_slots) in enumerate(plan.items()):
-            with cols[idx]:
-                st.markdown(f"<div class='schedule-header'>{day[:3]}</div>", unsafe_allow_html=True)
-                for h in range(9, 18):
-                    s = day_slots[h]
-                    if s:
-                        st.markdown(f"<div class='schedule-card'>{s}</div>", unsafe_allow_html=True)
-                    else:
-                        st.markdown("<div class='empty-slot'></div>", unsafe_allow_html=True)
-    else:
-        c_sel, _ = st.columns([1, 2])
-        with c_sel:
-            day_selected = st.selectbox("Seleziona Giorno", list(plan.keys()))
-        st.markdown(f"<h2 style='text-align:center; color:#FF9F1C; font-family:Outfit,sans-serif;'>{day_selected}</h2>", unsafe_allow_html=True)
-        day_slots = plan[day_selected]
-        if not any(v is not None for v in day_slots.values()):
-            st.markdown("<div style='text-align:center; opacity:0.5; padding:40px;'>🌿 Zen mode — nessuna sessione programmata</div>", unsafe_allow_html=True)
+        if view_type == "Visualizzazione Settimanale":
+            cols = st.columns(7)
+            days = list(plan.keys())
+            for i, d in enumerate(days):
+                with cols[i]:
+                    st.markdown(f"<div class='schedule-header'>{d[:3]}</div>", unsafe_allow_html=True)
+                    for h in range(9, 18):
+                        s = plan[d][h]
+                        if s: st.markdown(f"<div class='schedule-card'>{s}</div>", unsafe_allow_html=True)
+                        else: st.markdown("<div class='empty-slot'></div>", unsafe_allow_html=True)
         else:
+            sel_day = st.selectbox("Seleziona Giorno", list(plan.keys()))
+            day_slots = plan[sel_day]
             for h in range(9, 18):
                 s = day_slots[h]
-                if s:
-                    st.markdown(f"<div class='schedule-card' style='max-width:420px; margin:10px auto; padding:18px;'>{s}</div>", unsafe_allow_html=True)
-                else:
-                    st.markdown("<div class='empty-slot' style='max-width:420px; margin:10px auto;'></div>", unsafe_allow_html=True)
+                if s: st.markdown(f"<div class='schedule-card' style='max-width:400px; margin:10px auto;'>{s}</div>", unsafe_allow_html=True)
+                else: st.markdown("<div class='empty-slot' style='max-width:400px; margin:10px auto;'></div>", unsafe_allow_html=True)
+
+
+# ─── NAVIGATION ─────────────────────────────────────────────────────────────────
+def desktop_navbar():
+    """Renders a stable, high-quality fixed top navbar for desktop."""
+    page = st.session_state['current_page']
+    
+    # 1. Create a container for the navbar at the very top
+    nav_container = st.container()
+    with nav_container:
+        st.markdown('<div class="desktop-nav-anchor"></div>', unsafe_allow_html=True)
+        c_logo, c_dash, c_prof, c_plan = st.columns([1.5, 1, 1, 1])
+        
+        with c_logo:
+            st.markdown("""
+            <div style='display:flex; align-items:center; height:100%; padding-top:8px;'>
+                <span style='font-family:Outfit,sans-serif; font-weight:800; font-size:1.1rem; color:#00E5FF; letter-spacing:1px;'>
+                    🧘 ZENPLANNER AI
+                </span>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with c_dash:
+            is_active = page == "dashboard"
+            if st.button("🏠 Dashboard", key="nav_dash", use_container_width=True, type="primary" if is_active else "secondary"):
+                st.session_state['current_page'] = 'dashboard'; st.rerun()
+        with c_prof:
+            is_active = page == "profile"
+            if st.button("👤 Profilo", key="nav_prof", use_container_width=True, type="primary" if is_active else "secondary"):
+                st.session_state['current_page'] = 'profile'; st.rerun()
+        with c_plan:
+            is_active = page == "scheduler"
+            if st.button("📅 Planner", key="nav_plan", use_container_width=True, type="primary" if is_active else "secondary"):
+                st.session_state['current_page'] = 'scheduler'; st.rerun()
+
+    # 2. Inject JS to make THIS specific container fixed to the top
+    components.html("""
+    <script>
+    function applyNavbarRedesign() {
+        const anchor = window.parent.document.querySelector('.desktop-nav-anchor');
+        if (!anchor) return;
+        
+        const container = anchor.closest('[data-testid="stVerticalBlockBorderWrapper"]') 
+                       || anchor.closest('[data-testid="stVerticalBlock"]');
+        if (!container) return;
+
+        // Reset and Apply Fixed Styles
+        container.style.cssText = `
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            max-width: none !important;
+            background: rgba(10, 15, 40, 0.85) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+            z-index: 1000000 !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+            padding: 12px 60px !important;
+            display: flex !important;
+            justify-content: center !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4) !important;
+        `;
+        
+        // Target the column layout inside
+        const colWrap = container.querySelector('[data-testid="stHorizontalBlock"]');
+        if (colWrap) {
+            colWrap.style.cssText = 'width: 100% !important; max-width: 1400px !important; display: flex !important; align-items: center !important;';
+        }
+
+        // Global styles for Navbar Buttons
+        const buttons = container.querySelectorAll('button');
+        buttons.forEach(btn => {
+            const isPrimary = btn.getAttribute('kind') === 'primary';
+            btn.style.cssText = `
+                background: ${is_active ? 'rgba(0, 229, 255, 0.08)' : 'transparent'} !important;
+                border: none !important;
+                border-radius: 12px !important;
+                color: ${isPrimary ? '#00E5FF' : 'rgba(255, 255, 255, 0.5)'} !important;
+                font-family: Outfit, sans-serif !important;
+                font-weight: 600 !important;
+                letter-spacing: 0.3px !important;
+                padding: 10px 24px !important;
+                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                position: relative !important;
+                overflow: visible !important;
+              `;
+            
+            // Add indicator for active button
+            if (isPrimary && !btn.querySelector('.nav-active-bar')) {
+                const bar = document.createElement('div');
+                bar.className = 'nav-active-bar';
+                bar.style.cssText = 'position:absolute; bottom:-12px; left:25%; width:50%; height:3px; background:#00E5FF; border-radius:10px; box-shadow:0 0 10px rgba(0,229,255,0.6);';
+                btn.appendChild(bar);
+            }
+        });
+    }
+
+    applyNavbarRedesign();
+    setTimeout(applyNavbarRedesign, 100);
+    setTimeout(applyNavbarRedesign, 500);
+    new MutationObserver(applyNavbarRedesign).observe(window.parent.document.body, {childList: true, subtree: true});
+    </script>
+    """, height=0)
 
 
 # ─── MAIN ───────────────────────────────────────────────────────────────────────
@@ -586,133 +552,13 @@ def main():
         login_page()
         return
 
-    if 'current_page' not in st.session_state:
-        st.session_state['current_page'] = 'dashboard'
+    desktop_navbar()
 
     page = st.session_state['current_page']
     if page == "dashboard":   view_dashboard()
     elif page == "profile":   view_profile()
     elif page == "scheduler": view_scheduler()
     else:                     view_dashboard()
-
-    # ── Top navbar via JS injection ──
-    with st.container(border=True):
-        st.markdown('<div class="nav-marker"></div>', unsafe_allow_html=True)
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            t = "primary" if page == "dashboard" else "secondary"
-            if st.button("🏠 Dashboard", key="go_dash", use_container_width=True, type=t):
-                st.session_state['current_page'] = 'dashboard'; st.rerun()
-        with c2:
-            t = "primary" if page == "profile" else "secondary"
-            if st.button("👤 Profilo", key="go_prof", use_container_width=True, type=t):
-                st.session_state['current_page'] = 'profile'; st.rerun()
-        with c3:
-            t = "primary" if page == "scheduler" else "secondary"
-            if st.button("📅 Planner", key="go_sched", use_container_width=True, type=t):
-                st.session_state['current_page'] = 'scheduler'; st.rerun()
-
-    # JavaScript: move navbar to top as a floating header bar (desktop-first design)
-    components.html("""
-    <script>
-    function fixNavbar() {
-        var markers = window.parent.document.querySelectorAll('.nav-marker');
-        if (markers.length === 0) return;
-        var m = markers[0];
-        var container = m.closest('[data-testid="stVerticalBlockBorderWrapper"]')
-                     || m.closest('[data-testid="stVerticalBlock"]');
-        if (!container) return;
-
-        container.style.cssText = `
-            position: fixed !important;
-            top: 0px !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            width: 100% !important;
-            max-width: 1400px !important;
-            background: rgba(8, 14, 38, 0.90) !important;
-            backdrop-filter: blur(20px) !important;
-            -webkit-backdrop-filter: blur(20px) !important;
-            border: none !important;
-            border-bottom: 1px solid rgba(255,255,255,0.07) !important;
-            border-radius: 0 !important;
-            padding: 10px 32px !important;
-            z-index: 999999 !important;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.5) !important;
-            display: flex !important;
-            align-items: center !important;
-        `;
-
-        // Style the inner column container to be horizontal
-        var colWrap = container.querySelector('[data-testid="stHorizontalBlock"]');
-        if (colWrap) {
-            colWrap.style.cssText = 'display:flex; align-items:center; gap:8px; width:100%;';
-        }
-
-        var btns = container.querySelectorAll('button');
-        btns.forEach(function(btn) {
-            var isPrimary = btn.getAttribute('kind') === 'primary'
-                         || !!btn.closest('[data-testid="baseButton-primary"]');
-
-            btn.style.cssText = `
-                background: ${isPrimary ? 'rgba(0,180,216,0.18)' : 'transparent'} !important;
-                border: ${isPrimary ? '1px solid rgba(0,180,216,0.4)' : '1px solid transparent'} !important;
-                color: ${isPrimary ? '#00E5FF' : 'rgba(255,255,255,0.5)'} !important;
-                font-family: Outfit, sans-serif !important;
-                font-weight: 600 !important;
-                font-size: 0.85rem !important;
-                padding: 7px 20px !important;
-                border-radius: 10px !important;
-                cursor: pointer !important;
-                transition: all 0.2s ease !important;
-                white-space: nowrap !important;
-                min-height: 0 !important;
-            `;
-
-            btn.addEventListener('mouseenter', function() {
-                if (!isPrimary) {
-                    btn.style.background = 'rgba(255,255,255,0.06)';
-                    btn.style.color = 'rgba(255,255,255,0.85)';
-                }
-            });
-            btn.addEventListener('mouseleave', function() {
-                if (!isPrimary) {
-                    btn.style.background = 'transparent';
-                    btn.style.color = 'rgba(255,255,255,0.5)';
-                }
-            });
-
-            var inner = btn.querySelectorAll('p, div, span');
-            inner.forEach(function(el) {
-                el.style.cssText = 'white-space:nowrap !important; overflow:visible !important; text-overflow:unset !important; font-size:inherit !important;';
-            });
-        });
-
-        // Add logo text on the left
-        var existing = container.querySelector('.zen-logo-text');
-        if (!existing) {
-            var logo = document.createElement('div');
-            logo.className = 'zen-logo-text';
-            logo.style.cssText = 'font-family:Outfit,sans-serif; font-weight:800; font-size:1rem; color:#00E5FF; letter-spacing:1px; margin-right:auto; flex-shrink:0; padding-right:16px;';
-            logo.innerHTML = '🧘 ZENPLANNER AI';
-            container.insertBefore(logo, container.firstChild);
-        }
-    }
-
-    // Adjust block-container top padding to account for navbar height
-    function adjustPadding() {
-        var bc = window.parent.document.querySelector('.block-container');
-        if (bc) bc.style.paddingTop = '72px';
-    }
-
-    setTimeout(fixNavbar, 150);
-    setTimeout(fixNavbar, 400);
-    setTimeout(fixNavbar, 900);
-    setTimeout(adjustPadding, 200);
-    new MutationObserver(function() { fixNavbar(); adjustPadding(); })
-        .observe(window.parent.document.body, {childList: true, subtree: true});
-    </script>
-    """, height=0)
 
 
 if __name__ == "__main__":
