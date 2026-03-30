@@ -456,8 +456,9 @@ def desktop_navbar():
         with c_logo:
             st.markdown("""
             <div style='display:flex; align-items:center; height:100%; padding-top:8px;'>
+                <img src="assets/ZenPlannerLogo.png" id="logo" class="logo-glow" width="120" alt="Logo">
                 <span style='font-family:Outfit,sans-serif; font-weight:800; font-size:1.1rem; color:#00E5FF; letter-spacing:1px;'>
-                    🧘 ZENPLANNER AI
+                ZENPLANNER AI
                 </span>
             </div>
             """, unsafe_allow_html=True)
