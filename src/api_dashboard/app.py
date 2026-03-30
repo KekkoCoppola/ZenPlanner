@@ -132,42 +132,42 @@ def view_profile():
     st.markdown("<h1>Profilo Utente & Parametri ML 🧬</h1>", unsafe_allow_html=True)
     st.markdown("Configura le tue abitudini per calibrare l'Apprendimento Automatico e l'algoritmo di pianificazione.<br><br>", unsafe_allow_html=True)
 
-    c1, c2 = st.columns(2)
+    c1, c2, c3 = st.columns(3)
     with c1:
         st.markdown("### Dati Fisici & Accademici")
         age = st.slider("Età", 18, 50, 22)
-        st.markdown("<p style='font-size: 0.9rem; margin-bottom: 0;'>Ore di Sonno medie/notte</p>", unsafe_allow_html=True)
-        col_sh, col_sm = st.columns(2)
-        with col_sh: sleep_h = st.number_input("Ore", min_value=0, max_value=24, value=7, key="sh")
-        with col_sm: sleep_m = st.number_input("Min", min_value=0, max_value=59, value=0, key="sm")
-        sleep = sleep_h + (sleep_m / 60.0)
+        sleep = st.slider("Ore di Sonno medie/notte", 3.0, 14.0, 7.0)
         study = st.number_input("Carico Studio Attuale (h/settimana)", 0, 80, 20)
+        gpa = st.slider("GPA Attuale (0-4)", 0.0, 4.0, 3.0)
     with c2:
-        st.markdown("### Routine e Pressioni")
-        st.markdown("<p style='font-size: 0.9rem; margin-bottom: 0;'>Social Media (h/giorno)</p>", unsafe_allow_html=True)
-        col_soh, col_som = st.columns(2)
-        with col_soh: social_h = st.number_input("Ore", min_value=0, max_value=24, value=2, key="soh")
-        with col_som: social_m = st.number_input("Min", min_value=0, max_value=59, value=0, key="som")
-        social = social_h + (social_m / 60.0)
+        st.markdown("### Routine e Sfide")
+        social = st.slider("Social Media (h/giorno)", 0.0, 10.0, 2.0)
         exercise = st.slider("Attività Fisica (h/settimana)", 0, 20, 3)
+        family_support = st.slider("Supporto Familiare (1-5)", 1, 5, 3)
+        financial_stress = st.slider("Stress Finanziario (1-5)", 1, 5, 3)
+    with c3:
+        st.markdown("### Pressioni Psicologiche")
+        peer_pressure = st.slider("Pressione dei Pari (1-5)", 1, 5, 3)
         relation_stress = st.slider("Stress Relazionale (1-5)", 1, 5, 2)
+        diet_quality = st.slider("Qualità Dieta (1-5)", 1, 5, 3)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("💾 Salva Profilo", use_container_width=True):
+    if st.button("💾 Trasmetti Dati al Machine Learning", use_container_width=True):
         st.session_state['user_profile'] = UserProfile(
-            age=age, social_media_hours_per_day=social, sleep_hours_per_night=sleep,
-            physical_exercise_hours_per_week=exercise, relationship_stress=relation_stress, 
-            coping_mechanisms={}
+            age=age, gpa=gpa, social_media_hours_per_day=social, sleep_hours_per_night=sleep,
+            physical_exercise_hours_per_week=exercise, family_support=family_support,
+            financial_stress=financial_stress, peer_pressure=peer_pressure,
+            relationship_stress=relation_stress, diet_quality=diet_quality, coping_mechanisms={}
         )
         st.session_state['profile_configured'] = True
-        st.success("✅ Profilo Salvato!.")
+        st.success("✅ Modello Aggiornato! Le features sono pronte per il Random Forest.")
 
 
 def view_scheduler():
     st.markdown("<h1>Generatore Piano CSP 🚀</h1>", unsafe_allow_html=True)
 
     if not st.session_state['profile_configured']:
-        st.error("⚠️ Configura prima il tuo Profilo Utente !")
+        st.error("⚠️ Configura prima il tuo Profilo Utente per istruire l'Oracolo ML!")
         return
 
     user = st.session_state.get('user_profile')
@@ -182,7 +182,7 @@ def view_scheduler():
     with c3: subj_dead = st.selectbox("Scadenza Limite", ["Nessuna","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"])
     with c4:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("➕ Aggiungi"):
+        if st.button("➕ Add"):
             if subj_name:
                 st.session_state['subjects_list'].append({"name": subj_name, "hours": subj_hours, "deadline": subj_dead})
                 st.rerun()
@@ -194,11 +194,11 @@ def view_scheduler():
             deadline_text = f"⏳ Entro {s['deadline']}" if s['deadline'] != 'Nessuna' else ''
             st.markdown(f"🔹 **{s['name']}** &mdash; {s['hours']}h <span style='color:#FF9F1C; font-size:0.85rem;'>{deadline_text}</span>", unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🗑️ Pulisci Coda"):
+        if st.button("🗑️ Pulisci Coda C.S.P."):
             st.session_state['subjects_list'] = []
             st.rerun()
 
-    if st.button("✨ Avvia Pianificazione", use_container_width=True):
+    if st.button("✨ Avvia Risoluzione Neuro-Simbolica", use_container_width=True):
         if not st.session_state['subjects_list']:
             st.warning("Nessuna variabile fornita al CSP!")
             return
@@ -228,7 +228,7 @@ def view_scheduler():
                 day_name = days[slot.day_of_week]
                 plan[day_name][slot.start_time] = f"{slot.start_time:02d}:00 - {slot.start_time+1:02d}:00<br><b>{session.subject}</b>"
             st.session_state['study_plan'] = plan
-            st.success("✅ Piano Generato! Puoi visualizzarlo nella dashboard.")
+            st.success("✅ Orizzonti Pianificati! Naviga alla Dashboard per visualizzare l'output.")
         else:
             st.error("❌ Fallimento Backtracking. Riduci il carico o allenta le scadenze!")
             st.session_state['study_plan'] = {}
@@ -328,7 +328,8 @@ def main():
     function fixNavbar() {
         var markers = window.parent.document.querySelectorAll('.nav-marker');
         if (markers.length > 0) {
-            var container = markers[0].closest('[data-testid="stVerticalBlockBorderWrapper"]');
+            var m = markers[0];
+            var container = m.closest('[data-testid="stVerticalBlockBorderWrapper"]') || m.closest('div[data-testid="stVerticalBlock"]');
             if (container) {
                 container.style.cssText = `
                     position: fixed !important;
@@ -359,9 +360,11 @@ def main():
                         min-height: 0;
                         width: 100%;
                     `;
-                    if (btn.getAttribute('kind') === 'primary') {
-                        btn.style.color = '#00E5FF';
-                        btn.style.background = 'rgba(0,180,216,0.18)';
+                    // Detect if primary by checking the parent div's data-testid or the button kind
+                    var parentDiv = btn.closest('[data-testid="baseButton-primary"]');
+                    if (btn.getAttribute('kind') === 'primary' || parentDiv) {
+                        btn.style.color = '#00B4D8 !important';
+                        btn.style.background = 'rgba(0,180,216,0.18) !important';
                     }
                 });
             }

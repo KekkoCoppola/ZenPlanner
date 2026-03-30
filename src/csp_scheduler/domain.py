@@ -5,10 +5,15 @@ from typing import Dict, Optional
 class UserProfile:
     """Rappresenta le variabili d'ambiente fisse per l'Oracolo ML."""
     age: int
+    gpa: float
     social_media_hours_per_day: float
     sleep_hours_per_night: float
     physical_exercise_hours_per_week: float
+    family_support: int            # Scala 1-5
+    financial_stress: int          # Scala 1-5
+    peer_pressure: int             # Scala 1-5
     relationship_stress: int       # Scala 1-5
+    diet_quality: int              # Scala 1-5
     coping_mechanisms: Dict[str, int] # es. {'Coping_Meditation': 1, 'Coping_Exercise': 0, ...}
     
     # Preferenze addizionali hard-constraints
